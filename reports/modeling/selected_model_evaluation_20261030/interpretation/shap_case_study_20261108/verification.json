@@ -1,0 +1,106 @@
+{
+  "date": "2026-11-08",
+  "status": "passed",
+  "model_version": "catboost-selected-a8763faa0c2ef0786f72",
+  "model_sha256": "943571ed90e8ea591966dd27865c8348d7b43b77376a0770dbdd56548871435b",
+  "metadata_sha256": "b472322f5df28d8a53c2b91b2366e4a13da53b2599a524d652616230549e8a01",
+  "source_parquet_sha256": "3bf9e1788a81660901cdecb729bededa04fe83b2c3e77eb6346876d5028fda36",
+  "selection_rule": "First two rows in existing sample_predictions.csv, before computing SHAP; illustrative, not representative",
+  "model_refitted": false,
+  "threshold_changed": false,
+  "database_modified": false,
+  "checks": [
+    "SHAP full sum reconstructs raw margin at atol=1e-10",
+    "sigmoid of raw margin matches predict_proba at atol=1e-12",
+    "scores match frozen sample_predictions.csv at atol=1e-12",
+    "web top 10 features and values match CatBoost SHAP at atol=1e-10"
+  ],
+  "versions": {
+    "python": "3.14.0",
+    "catboost": "1.2.10",
+    "pandas": "2.3.3",
+    "numpy": "2.4.6"
+  },
+  "cases": [
+    {
+      "SK_ID_CURR": 100001,
+      "dataset": "application_test",
+      "TARGET_available": false,
+      "score": 0.05718142399208063,
+      "threshold": 0.14539365168823878,
+      "alert": false,
+      "base_value": -2.84050824249367,
+      "shap_sum": 0.037863458863188204,
+      "raw_margin": -2.8026447836304804,
+      "reconstruction_abs_error": 1.3322676295501878e-15,
+      "top5_abs": [
+        {
+          "feature": "EXT_SOURCE_3",
+          "value": 0.6390602625411916,
+          "input_value": 0.1595195405
+        },
+        {
+          "feature": "EXT_SOURCE_2",
+          "value": -0.45622605016467643,
+          "input_value": 0.7896543511
+        },
+        {
+          "feature": "EXT_SOURCE_1",
+          "value": -0.3709888720365572,
+          "input_value": 0.7526144906
+        },
+        {
+          "feature": "RATIO_CREDIT_GOODS_RECORDED",
+          "value": 0.1733589821529637,
+          "input_value": 1.264
+        },
+        {
+          "feature": "NAME_EDUCATION_TYPE",
+          "value": -0.1577046837257169,
+          "input_value": "Higher education"
+        }
+      ],
+      "remaining_shap_sum": 0.21036382009598334
+    },
+    {
+      "SK_ID_CURR": 100005,
+      "dataset": "application_test",
+      "TARGET_available": false,
+      "score": 0.1535097981678149,
+      "threshold": 0.14539365168823878,
+      "alert": true,
+      "base_value": -2.84050824249367,
+      "shap_sum": 1.1331740126073895,
+      "raw_margin": -1.7073342298862775,
+      "reconstruction_abs_error": 2.886579864025407e-15,
+      "top5_abs": [
+        {
+          "feature": "EXT_SOURCE_2",
+          "value": 0.4379591674320205,
+          "input_value": 0.291655532
+        },
+        {
+          "feature": "EXT_SOURCE_1",
+          "value": -0.26806399861649605,
+          "input_value": 0.5649902018
+        },
+        {
+          "feature": "EMPLOYED_YEARS",
+          "value": -0.22696196085261752,
+          "input_value": 12.2354551677
+        },
+        {
+          "feature": "CODE_GENDER",
+          "value": 0.2095649567214547,
+          "input_value": "M"
+        },
+        {
+          "feature": "RATIO_CREDIT_GOODS_RECORDED",
+          "value": 0.16286912127069833,
+          "input_value": 1.2376
+        }
+      ],
+      "remaining_shap_sum": 0.8178067266523298
+    }
+  ]
+}

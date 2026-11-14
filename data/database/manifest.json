@@ -1,0 +1,36 @@
+{
+  "mysql_version": "8.0.32",
+  "source_database": "home_credit_ml",
+  "expected_table_counts": {
+    "application_features": 356255,
+    "application_split": 356255,
+    "dataset_metadata": 3,
+    "demo_profiles": 200,
+    "model_versions": 3,
+    "raw_application_test": 48744,
+    "raw_application_train": 307511,
+    "raw_bureau": 1716428,
+    "raw_bureau_balance": 27299925,
+    "raw_credit_card_balance": 3840312,
+    "raw_installments_payments": 13605401,
+    "raw_load_manifest": 8,
+    "raw_pos_cash_balance": 10001358,
+    "raw_previous_application": 1670214,
+    "review_notes": 0,
+    "scoring_events": 604,
+    "user_audit": 0,
+    "users": 3
+  },
+  "sanitization": "Demo accounts use documented demo password; passwords stored as Werkzeug hashes; source DB unchanged.",
+  "uncompressed_sql": {
+    "bytes": 3694742776,
+    "sha256": "dd5a2314d85cc93cac093f4d40297138a2e6feaf03b9e3c5fc4709e4f3fb20ae"
+  },
+  "files": {
+    "database.sql.gz": {
+      "bytes": 1500643844,
+      "sha256": "a521242516985c23b71c54c729d7f13ea2786a1186e33990be71bc7561645f5a"
+    }
+  },
+  "snapshot_date": "2026-11-02"
+}

@@ -1,0 +1,20 @@
+.venv/
+venv/
+.idea/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+pytest-cache*/
+tmp/
+*.log
+.env
+.env.*
+!.env.example
+*.local.json
+data/database/database.sql
+
+# Large datasets and private demo credentials
+*.parquet
+*.sql.gz
+data/database/demo_accounts.json

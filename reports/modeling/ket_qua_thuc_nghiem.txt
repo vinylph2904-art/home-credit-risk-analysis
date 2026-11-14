@@ -1,0 +1,76 @@
+KẾT QUẢ GIAI ĐOẠN 4: HUẤN LUYỆN VÀ ĐÁNH GIÁ MÔ HÌNH
+
+1. Dữ liệu và thực nghiệm
+- MySQL home_credit_ml đã import/SELECT/đối soát 356.255 hồ sơ với notebook 03.
+- Train: 184.506; validation: 61.502; test nội bộ: 61.503; không nhãn: 48.744.
+- Giữ split 60/20/20 và ba fold train, seed 42. A có 127 cột, B có 199 cột.
+- 32 cấu hình LR/DT/RF x 3 fold = 96 lượt, thêm 6 lượt Dummy = 102 lượt CV chính.
+- Median, chỉ báo thiếu, mã hóa và scaling đều được fit trong phần train của fold.
+- RF dùng 4 luồng sau kiểm tra tài nguyên; các lượt CV chạy lần lượt. Đã đối chiếu
+  cùng fold một/bốn luồng: AP giống nhau, sai lệch score tối đa 8,33e-17.
+
+2. So sánh AP CV của cấu hình tốt nhất trong từng nhóm
+                 Bộ A       Bộ B
+Dummy          0,080729   0,080729
+LR             0,227260   0,252262
+Decision Tree  0,185308   0,182051
+Random Forest  0,221540   0,243515
+
+Chọn B_LR_02: Logistic Regression, C = 0,1, class_weight = None, log bốn biến tiền.
+AP CV = 0,252262, độ lệch chuẩn = 0,000812; ROC-AUC CV = 0,767417.
+Chênh AP trên phần đã học và CV của cấu hình này khoảng 0,009219.
+RF tốt nhất trên B có chênh khoảng 0,276244, cho thấy mức quá khớp lớn hơn.
+Lịch sử cải thiện LR/RF trong phạm vi đã thử; DT không cải thiện. Không suy ra
+mô hình tối ưu trên mọi cấu hình hoặc thay AP bằng kết quả Accuracy.
+
+3. Calibration và ngưỡng
+- Raw OOF Brier = 0,06731848; sigmoid OOF Brier = 0,06730985.
+- Chênh 0,00000863 rất nhỏ. Vẫn dùng sigmoid theo quy tắc đã công bố trước.
+- OOF kiểm tra calibration của ứng viên đã chọn bằng CV train; không phải nested
+  CV đánh giá không chệch toàn bộ quá trình chọn ứng viên. Không dùng test chọn lại.
+- Bản cuối fit trên train, không refit train + validation.
+- Validation chọn ngưỡng 0,162388 theo phạt giả định 5FN + FP.
+- Ngưỡng độ nhạy 2:1 = 0,332559; 10:1 = 0,092984; 20:1 = 0,054415.
+- Pipeline/schema/ngưỡng được cố định trước khi đọc nhãn test ở bước đánh giá.
+
+4. Test nội bộ, chính sách ngưỡng 0,162388
+AP                      0,261602
+ROC-AUC                 0,771289
+Brier                   0,066900
+Accuracy                86,23%
+Precision               26,91%
+Recall                  41,13%
+F1                      0,325366
+Tỷ lệ cảnh báo          12,34% (7.587 hồ sơ)
+TN / FP / FN / TP       50.993 / 5.545 / 2.923 / 2.042
+Điểm phạt 5:1 / hồ sơ  0,327789
+
+Mốc ngưỡng 0,5: Recall 2,82%, cảnh báo 0,39%, điểm phạt 0,393916/hồ sơ.
+Mốc không cảnh báo: Accuracy 91,93%, Recall 0%, điểm phạt 0,403639/hồ sơ.
+Chính sách chính giảm điểm phạt giả định khoảng 18,79% so với không cảnh báo,
+đồng thời tạo thêm khối lượng thẩm định. Đây không phải tiền tiết kiệm thực tế.
+
+5. Kịch bản chỉ xem top 10%
+Trên test, xem 6.151 hồ sơ xếp hạng cao nhất, bắt được 1.779/4.965 TARGET = 1:
+Precision top 10% = 28,92%; Recall top 10% = 35,83%; lift = 3,58.
+Kịch bản này riêng với chính sách ngưỡng: ngưỡng chính cảnh báo 12,34%, vượt
+năng lực 10% giả định. Không mô tả hai cách vận hành là cùng một chính sách.
+
+6. Giới hạn và bàn giao
+- Recall Cash loans khoảng 42,70%, Revolving loans khoảng 18,04% ở ngưỡng chung;
+  đọc cùng quy mô, tỷ lệ lớp và 316 hồ sơ dương tính của nhóm Revolving.
+- Hệ số LR áp dụng sau biến đổi, phụ thuộc cách mã hóa/thang đo; trị tuyệt đối
+  lớn không đồng nghĩa đóng góp toàn cục lớn. Không suy ra quan hệ nhân quả.
+- TARGET là khó khăn thanh toán theo nguồn, không đồng nhất NPL pháp lý/PD 12 tháng.
+- Test là phân tập ngẫu nhiên nội bộ; từng có thống kê toàn nguồn ở bước khám phá
+  ban đầu. Chưa có kiểm định ngoài thời gian hoặc hiệu quả vận hành ngân hàng.
+- Theo Rose & Hudgins, chấm điểm/cutoff cần đọc cùng đánh đổi và khả năng trả nợ;
+  tỷ lệ 5:1, AP và top 10% là thiết kế nhóm, không phải quy định từ sách.
+- Runtime hiện tại: artifacts/inference_metadata.json trỏ đến joblib đã fit.
+  selected_model/frozen_policy cũ được giữ làm lịch sử, không cần để predict.
+  Đối soát reload lịch sử trên 100 hồ sơ: sai lệch score = 0, cảnh báo giống nhau.
+- 8 bảng nguồn, 15 bảng đặc trưng và split giữ nguyên. Web đã triển khai.
+
+Nguồn kiểm chứng: notebook 04, 04_cv_summary.csv, 04_validation_metrics.csv,
+04_test_metrics.csv, 04_capacity_top10.csv, artifact_validation.json và mô hình
+đã cố định. Mọi số liệu trên được lấy từ thực nghiệm đã chạy, không suy từ lý thuyết.

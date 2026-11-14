@@ -1,0 +1,20 @@
+{
+  "model_refit": false,
+  "input": "shap_values_all_features.csv",
+  "checks": [
+    {
+      "SK_ID_CURR": 100001,
+      "all_features": 182,
+      "displayed_individually": 5,
+      "remainder_features": 177,
+      "reconstruction_abs_error": 1.3322676295501878e-15
+    },
+    {
+      "SK_ID_CURR": 100005,
+      "all_features": 182,
+      "displayed_individually": 5,
+      "remainder_features": 177,
+      "reconstruction_abs_error": 3.1086244689504383e-15
+    }
+  ]
+}

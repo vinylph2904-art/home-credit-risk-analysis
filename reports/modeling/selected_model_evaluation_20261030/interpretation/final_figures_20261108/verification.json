@@ -1,0 +1,191 @@
+{
+  "model_refitted": false,
+  "new_predictions_generated": false,
+  "curve_method": "Pooled existing held-out fold predictions; not reconstructed from mean metrics",
+  "models": [
+    {
+      "case_id": "B_FILTER_CAT_02",
+      "model": "CAT",
+      "n": 184506,
+      "pooled_ap": 0.26749871271906933,
+      "pooled_roc_auc": 0.7761996659659004,
+      "mean_fold_ap": 0.2676342592744893,
+      "fold_metrics_match_csv": true,
+      "ids_match_train_folds": true,
+      "labels_match_source": true,
+      "sources": [
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\boosting\\a450fb4764d4016017e0\\b_filter_cat_02\\fold_0.npz",
+          "sha256": "caf02f551f7c0da5ad3e472e2dde06c571646d19b2e410eaab00e6d3a522a826"
+        },
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\boosting\\a450fb4764d4016017e0\\b_filter_cat_02\\fold_1.npz",
+          "sha256": "3b4ebb973c056915c530ac59b5c7b35b80902745df9faa9f6a4e724e37784bc9"
+        },
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\boosting\\a450fb4764d4016017e0\\b_filter_cat_02\\fold_2.npz",
+          "sha256": "a91429a7b3ccffef87ed3bb9c5e591a1485a057b417dbba5bdf7e09e3d64d4e6"
+        }
+      ]
+    },
+    {
+      "case_id": "B_FILTER_XGB_02",
+      "model": "XGB",
+      "n": 184506,
+      "pooled_ap": 0.26660242055530053,
+      "pooled_roc_auc": 0.7763454421441569,
+      "mean_fold_ap": 0.2668532582956284,
+      "fold_metrics_match_csv": true,
+      "ids_match_train_folds": true,
+      "labels_match_source": true,
+      "sources": [
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\boosting\\a450fb4764d4016017e0\\b_filter_xgb_02\\fold_0.npz",
+          "sha256": "e64470d853c62f6d3e4d1180fb28ed2c8eca30e8f3cf0096e103ca3914f78856"
+        },
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\boosting\\a450fb4764d4016017e0\\b_filter_xgb_02\\fold_1.npz",
+          "sha256": "4ca17e5de009793f5d26c104200ce5b09e87ba02a69c3d6f51ba5b5677ec28bf"
+        },
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\boosting\\a450fb4764d4016017e0\\b_filter_xgb_02\\fold_2.npz",
+          "sha256": "3d88419a64a3c091316dd9de459b4376103a6c9e7e9ebaf388dd36fd658e3832"
+        }
+      ]
+    },
+    {
+      "case_id": "B_FILTER_LR_02",
+      "model": "LR",
+      "n": 184506,
+      "pooled_ap": 0.2518207347787096,
+      "pooled_roc_auc": 0.7672990120677161,
+      "mean_fold_ap": 0.2520253457184531,
+      "fold_metrics_match_csv": true,
+      "ids_match_train_folds": true,
+      "labels_match_source": true,
+      "sources": [
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\baseline\\76d465df77781aec27cb\\b_filter_lr_02\\fold_0.npz",
+          "sha256": "babf90f9847681c8c7c06904286f417a57411b10d26819dfd8e49dd268fd5bb8"
+        },
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\baseline\\76d465df77781aec27cb\\b_filter_lr_02\\fold_1.npz",
+          "sha256": "0adfc897c8dd709cbd1cfd18ee60e1495d4e657e30d9dad3c120a89ac707f0fa"
+        },
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\baseline\\76d465df77781aec27cb\\b_filter_lr_02\\fold_2.npz",
+          "sha256": "435e74c911bc661e63dcec6d9469fb285015ce962e9e31caa9032d26d022688f"
+        }
+      ]
+    },
+    {
+      "case_id": "B_FILTER_RF_02",
+      "model": "RF",
+      "n": 184506,
+      "pooled_ap": 0.2434508349645929,
+      "pooled_roc_auc": 0.7578357664020999,
+      "mean_fold_ap": 0.2436694898050846,
+      "fold_metrics_match_csv": true,
+      "ids_match_train_folds": true,
+      "labels_match_source": true,
+      "sources": [
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\baseline\\76d465df77781aec27cb\\b_filter_rf_02\\fold_0.npz",
+          "sha256": "a14d478cd326d5cecaab6ff98131d18ec6b08371c7a69e47e4b2c32ad65fac51"
+        },
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\baseline\\76d465df77781aec27cb\\b_filter_rf_02\\fold_1.npz",
+          "sha256": "2b2480f14894116d7fd922661e8179d8135832336c7c2a701166a78b5d7aabd2"
+        },
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\baseline\\76d465df77781aec27cb\\b_filter_rf_02\\fold_2.npz",
+          "sha256": "40018e74713e045688ccdd7d43df20f39f0e4e0d32a95d4deb4be9461fdce8cd"
+        }
+      ]
+    },
+    {
+      "case_id": "B_FILTER_DT_04",
+      "model": "DT",
+      "n": 184506,
+      "pooled_ap": 0.18348337383220456,
+      "pooled_roc_auc": 0.700063559335997,
+      "mean_fold_ap": 0.1824217476116665,
+      "fold_metrics_match_csv": true,
+      "ids_match_train_folds": true,
+      "labels_match_source": true,
+      "sources": [
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\baseline\\76d465df77781aec27cb\\b_filter_dt_04\\fold_0.npz",
+          "sha256": "841ebd3bf8f159a043cbf2993c08f73dcafb2e7f2450fa8970a24024da3c96f3"
+        },
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\baseline\\76d465df77781aec27cb\\b_filter_dt_04\\fold_1.npz",
+          "sha256": "985dbc0e93fd0bd919d74ec9cbdc7f76f5056c5c976a7c09ae167c87a4ecd058"
+        },
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\baseline\\76d465df77781aec27cb\\b_filter_dt_04\\fold_2.npz",
+          "sha256": "da399f147f4f547ede47cde7cc880d69fcf73c35c430dff3b10723bec50f35a9"
+        }
+      ]
+    },
+    {
+      "case_id": "B_FILTER_Dummy_01",
+      "model": "Dummy",
+      "n": 184506,
+      "pooled_ap": 0.08072908198107379,
+      "pooled_roc_auc": 0.5,
+      "mean_fold_ap": 0.0807290819810737,
+      "fold_metrics_match_csv": true,
+      "ids_match_train_folds": true,
+      "labels_match_source": true,
+      "sources": [
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\baseline\\76d465df77781aec27cb\\b_filter_dummy_01\\fold_0.npz",
+          "sha256": "8902bbfbb510ede6e310a7cc1fbf68d6b02e7560b7b14a04e99cd73b92ab3ff2"
+        },
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\baseline\\76d465df77781aec27cb\\b_filter_dummy_01\\fold_1.npz",
+          "sha256": "960ad0dd11a19c8c3a893e0811f33041dd9ca75e123e55c6ed2db82f687969b6"
+        },
+        {
+          "file": "reports\\modeling\\feature_selection_redo_20261029\\cache\\baseline\\76d465df77781aec27cb\\b_filter_dummy_01\\fold_2.npz",
+          "sha256": "c6cd015dfe77bc4c9830b2847d1bdf7121186f8e78ef065d37f7690b401738f3"
+        }
+      ]
+    }
+  ],
+  "threshold_scenarios": [
+    {
+      "fn_cost": 2,
+      "fp_cost": 1,
+      "threshold": 0.3536512741104018,
+      "recall": 0.1137965760322255,
+      "alert_rate": 0.020113167051478,
+      "counts_verified": true
+    },
+    {
+      "fn_cost": 5,
+      "fp_cost": 1,
+      "threshold": 0.1453936516882387,
+      "recall": 0.4656596173212487,
+      "alert_rate": 0.1491171018828656,
+      "counts_verified": true
+    },
+    {
+      "fn_cost": 10,
+      "fp_cost": 1,
+      "threshold": 0.0908310661964634,
+      "recall": 0.6582074521651561,
+      "alert_rate": 0.2819908295665181,
+      "counts_verified": true
+    },
+    {
+      "fn_cost": 20,
+      "fp_cost": 1,
+      "threshold": 0.0524413938299771,
+      "recall": 0.8396777442094663,
+      "alert_rate": 0.491902702351143,
+      "counts_verified": true
+    }
+  ]
+}

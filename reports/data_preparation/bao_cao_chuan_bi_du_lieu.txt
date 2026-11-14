@@ -1,0 +1,111 @@
+KẾT QUẢ GIAI ĐOẠN 3: CHUẨN BỊ DỮ LIỆU VÀ XÂY DỰNG ĐẶC TRƯNG
+
+Notebook: 03_Data_Preparation_Feature_Engineering.ipynb
+Đơn vị quan sát: một hồ sơ vay hiện tại (SK_ID_CURR).
+
+1. PHẠM VI VÀ ĐẦU RA
+Giữ nguyên split và ba CV fold từ notebook 01. Có 184.506 hồ sơ train,
+61.502 validation, 61.503 test nội bộ và 48.744 application_test không nhãn.
+TARGET không được đọc vào bảng đặc trưng; ID phục vụ nối và truy vết.
+
+Bộ A: 127 đặc trưng, gồm 111 biến số và 16 biến phân loại.
+Bộ B: 199 đặc trưng, gồm A + 66 biến lịch sử + 6 cờ có nguồn sử dụng được.
+Mỗi bộ có bốn bảng Parquet theo vai trò từng tập, giữ nguyên tập hồ sơ nền.
+Sáu bảng lịch sử được tổng hợp riêng về cấp hồ sơ trước khi ghép.
+
+2. QUY TẮC ĐÃ ÁP DỤNG
+- Sentinel DAYS_EMPLOYED = 365243 chuyển NaN, giữ cờ riêng. Train có 33.122 hồ sơ.
+- Tuổi xe không áp dụng ở 121.925 hồ sơ train không có xe; 4 hồ sơ có xe nhưng
+  thiếu tuổi xe được ghi cờ khác. Ô thiếu và không áp dụng không bị gọi chung.
+- Quy đổi năm trường ngày sang năm; thêm bốn tỷ số kỹ thuật với mẫu số dương.
+- Không xóa hồ sơ hoặc clipping chỉ vì vượt IQR. Giữ số dư âm và tỷ số vượt 1.
+- Giữ XNA/XAP; ô phân loại thực sự thiếu dùng token __MISSING__ cố định.
+- Dòng lịch sử đáp ứng điều kiện thời gian riêng từng nguồn. Snapshot tháng < 0;
+  bureau kiểm tra ngày bắt đầu/cập nhật; previous dùng ngày quyết định < 0.
+- Tiền bureau chỉ tổng hợp trong currency 1; các mã khác được giữ trong số đếm.
+- Installments: ngày trả <= 0 VÀ ngày hạn <= 0, thông tin khóa/ngày/tiền hợp lệ.
+  Cộng tiền theo hồ sơ/khoản/phiên bản/kỳ, không coi mỗi dòng là một kỳ riêng.
+- Chỉ điền 0 cho số đếm khi không có quan sát đủ điều kiện. Thống kê tiền,
+  thời gian và tỷ lệ không xác định vẫn giữ NaN để xử lý trong fold train.
+
+3. MỨC BAO PHỦ TRÊN TRAIN
+Nguồn                 Có dữ liệu dùng được     Tỷ lệ
+bureau                       158.164             85,72%
+bureau_balance                55.257             29,95%
+previous_application         174.636             94,65%
+POS_CASH_balance             173.672             94,13%
+credit_card_balance           52.231             28,31%
+installments_payments        174.994             94,84%
+
+Không có lịch sử dùng được chưa chứng minh khách hàng vay lần đầu hoặc trả nợ tốt.
+Phạm vi dòng theo từng nguồn được ghi trong 03_history_scope.csv; độ bao phủ
+theo hồ sơ được ghi riêng trong 03_train_history_coverage.csv.
+
+4. KIỂM TRA ĐÃ THỰC HIỆN
+- 24 lần ghép lịch sử giữ nguyên số dòng và khóa duy nhất.
+- Bốn tập A/B khớp ID; B giữ nguyên toàn bộ các giá trị A.
+- Không có TARGET, split, CV fold trong cột dự báo; không có giá trị vô cực.
+- Từ điển có đủ 199 biến, kèm nguồn, công thức, đơn vị, kiểu và quy tắc thiếu.
+- 12 lượt kiểm tra tiền xử lý: A/B × LR/cây × 3 fold. Mỗi lượt fit 123.004
+  hồ sơ và transform 61.502 hồ sơ còn lại trong train; đầu ra hữu hạn và xử lý
+  được mức phân loại mới. A có 318–322 cột đầu ra, B có 434–438 tùy fold.
+- Đối soát lại nhóm kỳ nhiều lần thanh toán và hồ sơ có nhiều mã tiền với nguồn.
+- Tám bảng nguồn và split giữ nguyên SHA-256; manifest lưu 15 bảng đặc trưng.
+- Thông tin chạy kernel mới và kiểm tra artifact lưu tại notebook_execution.json
+  và artifact_validation.json trong cùng thư mục báo cáo.
+
+5. GIỚI HẠN VÀ BÀN GIAO
+Các trường hiện tại được giả định khả dụng theo bộ dữ liệu hồi cứu; chưa có log
+thời điểm từng trường hoặc thứ tự trong ngày/tháng. Đây chưa phải kiểm định theo
+thời gian thực tế. Việc chọn tháng < 0 là quy tắc thận trọng của nhóm.
+
+Các nhóm kỳ theo phiên bản chưa chắc là nghĩa vụ kinh tế độc lập. Lịch thanh toán
+chỉ cho biết khoản đã quan sát trong phạm vi lọc, chưa đủ dựng toàn bộ lịch nghĩa
+vụ hoặc nợ quá hạn hiện hữu. Không có dòng chưa có nghĩa khách hàng trả 0.
+Các tỷ số kỹ thuật chưa phải DTI, EAD hoặc PD; chưa suy ra tiết kiệm tiền thực tế.
+
+Dữ liệu xuất chưa impute/scale bằng thống kê học từ nhiều hồ sơ. Transformer
+fit thử không được lưu để dùng lại. Notebook 04 cần tạo pipeline mới theo
+configs/preprocessing_schema.json, nối nhãn bằng ID và thực nghiệm đúng protocol
+configs/research_design.json. Chưa huấn luyện classifier, chọn mô hình, calibration,
+chọn ngưỡng hoặc đánh giá test. Kiểm định missing được bàn trước đó chưa thực hiện.
+
+
+6. CẬP NHẬT CÁCH TỔ CHỨC CODE — 22/10/2026
+Notebook 03 dùng models/HomeCreditPreparation.py kế thừa HomeCreditData.
+Dữ liệu nghiệp vụ được SELECT từ MySQL raw_*; application_split đọc từ CSDL.
+Không lấy đầu vào từ cache raw_mysql. Parquet trong data/features là kết quả
+trung gian/đầu ra; file split chỉ đối chiếu với phân tập CSDL đã chốt.
+Các file nguồn gốc được kiểm tra hash để truy vết, không phải đọc vào xử lý.
+
+Đã chạy kernel mới 40 cell, không lỗi, 598.10 giây.
+15 file đặc trưng khớp toàn bộ ID/thứ tự/dtype/giá trị/NaN và SHA-256.
+12 bảng CSV giữ nguyên giá trị; 47 file bảo vệ giữ hash,
+gồm cấu hình, từ điển, manifest, split, pipeline và kết quả mô hình.
+22 ví dụ độc lập đạt; lời gọi lặp trong thời gian giữ kết quả không thêm SQL.
+Sau khi xuất A/ghép B, dữ liệu lớn được giải phóng theo bước; khởi động phiên
+mới hoặc chủ động giải phóng thì cần đọc/tính lại khi chạy lại phần đó.
+Không fit lại classifier, không đổi ngưỡng hoặc dữ liệu ứng dụng.
+
+Các đối soát trên ghi nhận phạm vi và kết quả của lần kiểm tra kỹ thuật tại thời điểm thực hiện.
+Chưa sửa notebook 04 trong đợt này; chờ nhóm duyệt 03 trước.
+
+
+7. HOÀN TẤT SÁU NGUỒN THEO CÁCH SQL QUA CONNECTOR
+Đã hoàn tất các hàm bureau, bureau_balance, previous, POS, card và installments.
+SQL được viết rõ trong từng hàm, gọi Connector để trả DataFrame. POS tổng hợp
+ngay tại MySQL. Các phép tính pandas còn lại giữ đúng quy tắc và giá trị số
+thực đã đóng băng. Nguồn lớn đọc theo lô/khoảng ID; kết quả dùng lại trong phiên.
+Các truy vấn đối chiếu kỳ thanh toán và tiền tệ cũng được viết rõ, có tham số.
+
+Lần chạy đủ 40 cell không lỗi: 2418.04 giây, gồm bản đọc
+thanh toán chưa tối ưu. Sau đó đã đổi riêng thanh toán về đọc theo lô/bỏ JOIN
+lặp và kiểm tra lại đủ hàm: 197.14 giây.
+Đối chiếu 15 bảng Parquet: ID/thứ tự/dtype/giá trị/NaN giống hoàn toàn và SHA-256
+giữ nguyên. 12 bảng CSV cùng giá trị. 82 file bảo vệ khác giữ hash, chỉ lớp
+HomeCreditPreparation thay đổi có chủ ý. 22 ví dụ biên đạt và lời gọi lặp không
+thêm SQL. 12 lượt kiểm tra tiền xử lý trong train đạt; không fit lại classifier.
+21 mục tiêu/kết luận và 26 liên kết mục lục được kiểm tra. Model, threshold,
+split, từ điển, manifest và chữ ký dữ liệu giữ nguyên. Không ghi dữ liệu MySQL.
+Đây là hoàn tất cách đọc SQL của 03, không phải chuyển
+mọi phép tính sang SQL hoặc tuyên bố phần code notebook 04 đã tái cấu trúc xong.

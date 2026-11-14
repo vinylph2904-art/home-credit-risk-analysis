@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "train_n": 184506,
+  "positive_n": 14895,
+  "all_counts_and_rounded_rates_match_table_4_7": true,
+  "note": "Same qcut(q=5) method as notebook 03; only group display names Q1\u2013Q5 become G1\u2013G5"
+}

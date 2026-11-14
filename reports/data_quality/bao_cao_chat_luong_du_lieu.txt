@@ -1,0 +1,80 @@
+BÁO CÁO GIAI ĐOẠN 2: HIỂU DỮ LIỆU VÀ KIỂM TRA CHẤT LƯỢNG
+
+Notebook 01: schema, từ điển, grain, khóa, liên kết, cố định train/validation/test và CV.
+Notebook 02: 7 nhóm chính, 20 mục nhỏ; dùng lớp HomeCreditQuality để đọc MySQL
+và kiểm tra lịch sử, kết hợp pandas/biểu đồ trực tiếp trong notebook.
+Mục tiêu và kết luận được trình bày bằng Markdown.
+Mục 04.4 chia thêm bốn phần; toàn notebook có 25 mục tiêu và 25 kết luận.
+Các mục 05.3–05.5 kiểm tra logic: khách hàng, ngày/số tiền lịch sử, nghĩa vụ cùng kỳ.
+Mục lục có liên kết đến từng phần. Các mục cùng nhóm được gom dưới một tiêu đề;
+mục tiêu, kết luận, code và kết quả phân tích đã chạy được giữ đầy đủ.
+Đã chạy từng notebook trong kernel mới và giữ kết quả trong file ipynb.
+
+PHẠM VI
+Train có 184.506 hồ sơ, TARGET = 1 có 14.895 (8,0729%). Thống kê giá trị,
+thiếu và quan hệ TARGET chỉ dùng train và lịch sử xác định được thuộc train.
+Kiểm tra khóa, trùng hoàn toàn và liên kết là kiểm tra kỹ thuật toàn nguồn.
+Notebook cũ đã từng mô tả toàn nguồn; không nhận test chưa từng được quan sát.
+
+KẾT QUẢ CHÍNH
+- Cả tám bảng có 0 dòng trùng hoàn toàn. Bảy khóa dự kiến duy nhất đều hợp lệ.
+- Khóa kỳ trả nợ lặp dư 653.483 dòng toàn nguồn; riêng train 339.914 dòng,
+  thuộc 333.216 kỳ. Không đánh đồng với trùng bản ghi hay tự động xóa.
+- COMMONAREA thiếu 69,81%; hai lãi suất previous thiếu 99,66% trên train.
+- Lịch sử credit card bao phủ 52.231/184.506 hồ sơ train, installments 175.000.
+- 3.120.184 dòng bureau_balance toàn nguồn thiếu bảng cha, chưa xác định chủ.
+- DAYS_EMPLOYED = 365243 có 33.122 hồ sơ train; chưa coi là ngày thực tế.
+- Có tiền âm trong lịch sử debt/balance; chưa thay thế hoặc loại bỏ.
+- Ngày dự kiến dương chưa đủ kết luận leakage. 11 dòng ngày cập nhật bureau dương
+  và snapshot tháng 0 cần kiểm chứng tính sẵn có tại thời điểm dự báo.
+- Lịch sử train có 597.363 dòng trả sau hạn, 673.729 dòng trả nhỏ hơn nghĩa vụ,
+  1.563 dòng thiếu ngày trả. Đây là số dòng; không phải số khách hàng vi phạm.
+- Mẫu đối soát gồm năm kỳ lặp; cần kiểm tra nhất quán nghĩa vụ và tổng hợp đúng
+  cấp kỳ trước khi tạo đặc trưng. Không khái quát từ mẫu minh họa.
+- EXT_SOURCE có liên hệ nghịch với TARGET; EDA không chứng minh nhân quả.
+- Notebook 01 mục 4.1 có bảng nhóm biến, ý nghĩa nghiệp vụ và giới hạn diễn giải.
+- Notebook 02 mục 03.3 tách tuổi xe thiếu theo điều kiện: không có xe thiếu
+  121.925/121.925 hồ sơ; nhóm có xe thiếu 4/62.581 hồ sơ. Chưa kết luận MAR/MNAR.
+- Mục 06.4 bổ sung phân phối và tỷ lệ TARGET theo tuổi/thâm niên, tách sentinel.
+- Mục 03.4 phân biệt MCAR/MAR/MNAR, xem thiếu theo nhóm thu nhập và tuổi.
+  Nghề nghiệp thiếu 99,99% ở nhóm hưu trí so với 15,76% ở nhóm Working;
+  thiếu EXT_SOURCE_1 tăng từ 41,36% ở nhóm tuổi thấp nhất lên 77,02% ở nhóm cao nhất.
+  Những liên hệ này chưa phân biệt MAR với MNAR; không gán cơ chế chắc chắn.
+- Mục 04.4: vượt hàng rào IQR ở thu nhập 8.445 (4,58%), credit 3.978 (2,16%),
+  annuity 4.526 (2,45%), goods price 8.912 (4,83%). Mẫu số là số không thiếu
+  riêng từng cột; các cờ có thể giao nhau và không chứng minh lỗi dữ liệu.
+  Có boxplot toàn train/theo sản phẩm, 40 dòng minh họa cực trị và ba cặp tiền
+  trên scatter theo Cash/Revolving; chưa gán ngoại lai đa biến định lượng.
+  IQR theo sản phẩm được so với cờ toàn train trên cùng hồ sơ; số cờ thay đổi
+  do nhóm tham chiếu khác nhau, không có nghĩa đã xác định lỗi chính xác hơn.
+  Revolving loans có 41 cờ credit theo toàn train và 1.456 cờ theo nhóm;
+  Cash loans có 8.628 cờ goods price theo toàn train và 4.700 cờ theo nhóm.
+  40 dòng minh họa thuộc 35 hồ sơ. Hai cặp có annuity thiếu 8 hồ sơ Cash loans;
+  không có cặp không dương bị bỏ khỏi trục log. Chưa quy đổi tỷ số thành DTI.
+- Mục 06.5 tổng hợp riêng bureau và POS lên cấp hồ sơ, giữ đủ train khi ghép;
+  nguồn không có lịch sử và nguồn có thông tin chưa xác minh được tách riêng.
+  Tình trạng tiền quá hạn bureau khác với DPD tại snapshot POS; không quy thành
+  số kỳ trả nợ vi phạm, không coi chưa ghi nhận quá hạn là chắc chắn trả tốt.
+  Nhóm có khoản bureau báo tiền quá hạn có 2.034 hồ sơ, tỷ lệ TARGET=1 là 15,88%;
+  nhóm chưa ghi nhận tiền quá hạn có 156.055 hồ sơ, tỷ lệ 7,62%. POS ghi nhận
+  DPD>0 ở 32.830 hồ sơ, tỷ lệ TARGET=1 là 10,14%, so với 7,68% ở nhóm chưa ghi nhận.
+- Logic giữa các cột được thống kê riêng trong 02_logic_application.csv,
+  02_logic_history.csv và 02_logic_installment_periods.csv; kèm ví dụ nếu có.
+  Mẫu số là số dòng/kỳ đủ thông tin, không gồm missing/sentinel ngoài phạm vi.
+  Cờ logic cần xác minh trước khi xử lý, không tự động xóa hoặc coi là vi phạm.
+- Năm quy tắc application không phát hiện cờ trong tập đủ điều kiện. Bureau có
+  6 dòng kết thúc và 69 dòng cập nhật trước ngày xin vay cần đối soát thời gian.
+- Các quan hệ số tiền bị gắn cờ: 14.962 dòng dư nợ lớn hơn số tiền tín dụng,
+  435 dòng quá hạn lớn hơn dư nợ, 176.568 dòng số dư lớn hơn hạn mức cùng tháng.
+  Đây là các nhóm dòng có thể giao nhau, chưa đủ căn cứ kết luận là lỗi.
+- Toàn bộ 333.216 kỳ lặp train có nghĩa vụ và ngày đến hạn nhất quán, nhưng
+  vẫn cần tổng hợp thanh toán để xác định đã trả đủ hay đúng hạn.
+
+TÁI LẬP VÀ GIỚI HẠN
+Dữ liệu đọc theo lô 100.000 dòng. Phân vị application dùng toàn bộ train.
+Tám SHA-256 nguồn khớp manifest giai đoạn 1; nguồn không bị thay đổi.
+Code không phụ thuộc audit.py. Kết quả CSV/hình mới mang tiền tố 02_.
+TARGET không đồng nghĩa nợ xấu pháp lý hoặc PD 12 tháng. Chưa xác minh DTI/EAD.
+Chưa làm sạch nguồn, tạo bộ đặc trưng mô hình hoặc huấn luyện.
+Giai đoạn 3 sẽ xử lý thiếu, sentinel, thời gian và tổng hợp lịch sử, với các tham
+số học từ dữ liệu chỉ fit trên train/CV fold theo thiết kế đã chốt.

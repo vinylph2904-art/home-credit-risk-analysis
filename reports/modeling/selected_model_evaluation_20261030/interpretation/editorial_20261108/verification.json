@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "purpose": "Editorial replot of saved gains/deciles; no model refit or new predictions",
+  "checks": [
+    {
+      "dataset": "validation",
+      "n": 61502,
+      "positive_n": 4965,
+      "decile_n_reconciles": true,
+      "decile_positive_n_reconciles": true
+    },
+    {
+      "dataset": "historical_internal_test",
+      "n": 61503,
+      "positive_n": 4965,
+      "decile_n_reconciles": true,
+      "decile_positive_n_reconciles": true
+    }
+  ],
+  "deciles_sha256": "ae5234475e9992a725f16c21c4ae4f98639fc9e087d4a9b5798ac76f4c40ba5e"
+}
