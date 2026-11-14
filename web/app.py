@@ -76,4 +76,14 @@ if __name__ == '__main__':
         with app.app_context():
             initialize_database(args.seed_demo)
     else:
+        # Prepare immutable reports while the user is on the login page.
+        from threading import Thread
+        def prepare_landing_report():
+            try:
+                from web.financial_context import financial_context
+                with app.test_request_context('/'):
+                    financial_context(overview=True)
+            except Exception:
+                app.logger.warning('Landing report warm-up failed; requests will retry normally.')
+        Thread(target=prepare_landing_report, daemon=True, name='landing-report-warmup').start()
         app.run(host='127.0.0.1', port=args.port, debug=False)

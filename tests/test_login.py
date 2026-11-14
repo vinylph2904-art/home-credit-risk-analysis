@@ -50,6 +50,16 @@ def test_login_omits_logo_and_serves_its_styles_without_authentication(client):
     assert response.status_code == 200 and response.mimetype == 'text/css'
 
 
+def test_login_preloads_only_the_public_chart_library(client):
+    page = BeautifulSoup(client.get('/login').data, 'html.parser')
+    preload = page.select_one('link[rel=preload][as=script]')
+    assert '/vendor/plotly.min.js?v=' in preload['href']
+    response = client.get(preload['href'])
+    assert response.status_code == 200
+    assert response.headers['Cache-Control'] == 'private, max-age=86400'
+    assert client.get('/applications').status_code == 302
+
+
 @pytest.mark.parametrize('path', ['/', '/risk?segment=income', '/applications', '/model', '/history', '/analysis/records'])
 def test_unauthenticated_pages_redirect_before_reading_data(client,path):
     response = client.get(path)

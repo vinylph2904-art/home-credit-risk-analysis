@@ -20,25 +20,31 @@ Dashboard sử dụng mô hình đã lưu nên bạn có thể chạy ứng dụ
 
 ## Một số hình ảnh giao diện
 
-Các ảnh dưới đây được chụp trực tiếp từ ứng dụng ngày 14/11/2026, bằng tài khoản trưởng bộ phận rủi ro. Số liệu trên màn hình phụ thuộc vào dữ liệu và quyền truy cập của tài khoản.
-
-### Tổng quan tài chính và tín dụng
-
-Trang tổng quan tập hợp các chỉ số và biểu đồ để người dùng theo dõi cơ cấu khoản vay, thu nhập và các dấu hiệu thanh toán trong lịch sử.
-
-![Dashboard tổng quan tài chính và tín dụng với các chỉ số, cơ cấu khoản vay và biểu đồ phân bố](docs/images/dashboard-overview.png)
+Các ảnh được lấy từ mục **4.6.1. Kết quả triển khai ứng dụng** trong báo cáo đồ án (Hình 4.17–4.20), ghi nhận giao diện ngày 08/11/2026. Số liệu trên màn hình phụ thuộc vào dữ liệu và quyền truy cập của tài khoản.
 
 ### Rà soát hồ sơ
 
 Danh sách 200 hồ sơ demo hiển thị điểm rủi ro, cảnh báo mô hình, trạng thái rà soát và người phụ trách, cùng các công cụ tìm kiếm, lọc và phân công.
 
-![Giao diện rà soát 200 hồ sơ demo, sắp xếp theo điểm rủi ro](docs/images/applications-dashboard.png)
+![Hình 4.17. Giao diện hàng đợi rà soát hồ sơ](docs/images/report-queue.png)
+
+### Phân công và theo dõi công việc
+
+Tab Phân công tổng hợp khối lượng rà soát theo người phụ trách và trạng thái xử lý, giúp người quản lý theo dõi những hồ sơ chưa được giao.
+
+![Hình 4.18. Giao diện phân công và theo dõi khối lượng rà soát](docs/images/report-assignments.png)
+
+### Lịch sử chấm điểm
+
+Mỗi lần chấm điểm được lưu cùng ngưỡng cảnh báo, thời điểm và phiên bản mô hình để thuận tiện tra cứu, đối soát.
+
+![Hình 4.19. Giao diện lịch sử chấm điểm hồ sơ](docs/images/report-history.png)
 
 ### Thông tin và đánh giá mô hình
 
 Trang mô hình hiển thị các chỉ số trên tập validation, đường Precision–Recall, ROC, ma trận nhầm lẫn và hiệu quả rà soát theo số lượng hồ sơ.
 
-![Trang thông tin mô hình CatBoost với các chỉ số validation và biểu đồ đánh giá](docs/images/model-dashboard.png)
+![Hình 4.20. Giao diện đánh giá hiệu năng mô hình](docs/images/report-model.png)
 
 ## Công nghệ sử dụng
 

@@ -44,3 +44,14 @@ còn thiếu cho hồ sơ đã quản lý, giữ lại lịch sử.
 
 Khởi động lại Flask sau khi sửa Python. Static asset có version theo nội dung;
 cache truy vấn được lưu trong `tmp/dashboard_research_cache/`.
+
+Các trang tổng quan và phân tích phân khúc còn giữ tối đa 16 bộ kết quả báo cáo
+nghiên cứu trong bộ nhớ, phân biệt theo phiên bản dữ liệu, đường dẫn và bộ lọc.
+Khi quay lại một bộ lọc đã xem, ứng dụng dùng lại thống kê và biểu đồ đã chuẩn bị.
+Cache này không chứa tài khoản, token phiên hay dữ liệu hồ sơ đang được cập nhật.
+Đổi `data_version` khi thay dữ liệu nghiên cứu; khởi động lại Flask sau khi sửa mã
+để xóa cache trong bộ nhớ.
+
+Khi chạy `web/app.py`, ứng dụng chuẩn bị báo cáo tổng quan ở luồng nền trong lúc
+người dùng đăng nhập. CSS/JavaScript có URL theo nội dung được trình duyệt giữ lại;
+thư viện Plotly có URL theo phiên bản để tránh tải lại sau mỗi lần đăng nhập.

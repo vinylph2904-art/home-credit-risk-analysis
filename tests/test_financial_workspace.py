@@ -7,6 +7,44 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import pytest
 
+
+def test_report_cache_reuses_values_without_sharing_mutations(report_context, monkeypatch):
+    views._report_contexts.clear()
+    monkeypatch.setitem(app.config, 'TESTING', False)
+    calls = []
+    original = views.financial_summary
+    def summary(data):
+        calls.append(len(data))
+        return original(data)
+    monkeypatch.setattr(views, 'financial_summary', summary)
+    with app.test_request_context('/?income=Working'):
+        first = report_context()
+        expected = first['financial_summary']['credit']
+        first['financial_summary']['credit'] = -1
+    with app.test_request_context('/?income=Working'):
+        second = report_context()
+    assert second['financial_summary']['credit'] == expected
+    assert len(calls) == 1
+    with app.test_request_context('/?income=Pensioner'):
+        report_context()
+    assert len(calls) == 2
+    views._report_contexts.clear()
+
+
+def test_report_cache_invalidates_on_data_version(report_context, monkeypatch):
+    views._report_contexts.clear()
+    monkeypatch.setitem(app.config, 'TESTING', False)
+    original = views.financial_data
+    with app.test_request_context('/'):
+        assert report_context()['data_version'] == 'test'
+    def revised():
+        scope, _, *rest = original()
+        return scope, 'updated', *rest
+    monkeypatch.setattr(views, 'financial_data', revised)
+    with app.test_request_context('/'):
+        assert report_context()['data_version'] == 'updated'
+    views._report_contexts.clear()
+
 from web.app import app
 from web import financial_context as views, request_helpers as query, runtime
 from web.financial import HISTORY_SOURCES, overview_figures

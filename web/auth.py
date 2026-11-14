@@ -86,7 +86,7 @@ def configure_auth(app, get_db):
     @app.before_request
     def require_login():
         g.current_user = None
-        if request.endpoint in [None, 'static', 'brand_logo']:
+        if request.endpoint in [None, 'static', 'brand_logo', 'plotly_javascript']:
             return None
         user_id = session.get('user_id')
         user = find_user(get_db(), user_id=user_id) if user_id else None
@@ -111,7 +111,9 @@ def configure_auth(app, get_db):
 
     @app.after_request
     def private_pages(response):
-        if request.endpoint != 'static':
+        if request.endpoint == 'plotly_javascript' and response.status_code in [200, 304]:
+            response.headers['Cache-Control'] = 'private, max-age=86400'
+        elif request.endpoint != 'static':
             response.headers['Cache-Control'] = 'no-store'
             response.vary.add('Cookie')
         return response

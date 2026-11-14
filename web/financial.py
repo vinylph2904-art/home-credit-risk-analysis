@@ -1,6 +1,8 @@
 """Financial reporting aggregates and figures; never fit or write scoring data."""
 import numpy as np
 import pandas as pd
+from copy import deepcopy
+from flask import g, has_request_context
 import plotly.graph_objects as go
 from textwrap import wrap
 
@@ -46,32 +48,42 @@ def valid_values(data, column, positive=False):
 
 
 def financial_summary(data):
-    credit = valid_values(data, 'AMT_CREDIT')
-    result = {'n': len(data), 'credit_n': int(credit.notna().sum()),
-              'credit': float(credit.sum()) if credit.notna().any() else None,
-              'median_credit': float(credit.median()) if credit.notna().any() else None}
+    def values(column):
+        array = pd.to_numeric(data[column], errors='coerce').to_numpy(dtype=float, na_value=np.nan)
+        return np.where(np.isfinite(array) & (array >= 0), array, np.nan)
+    credit = values('AMT_CREDIT')
+    valid_credit = np.isfinite(credit)
+    result = {'n': len(data), 'credit_n': int(valid_credit.sum()),
+              'credit': float(credit[valid_credit].sum()) if valid_credit.any() else None,
+              'median_credit': float(np.median(credit[valid_credit])) if valid_credit.any() else None}
     for name, numerator, denominator in [
         ('credit_income', 'AMT_CREDIT', 'AMT_INCOME_TOTAL'),
         ('annuity_income', 'AMT_ANNUITY', 'AMT_INCOME_TOTAL'),
         ('credit_goods', 'AMT_CREDIT', 'AMT_GOODS_PRICE')]:
-        ratio = valid_values(data, numerator) / valid_values(data, denominator, positive=True)
-        ratio = ratio.where(np.isfinite(ratio))
-        result[name] = float(ratio.median()) if ratio.notna().any() else None
-        result[name + '_n'] = int(ratio.notna().sum())
+        top = credit if numerator == 'AMT_CREDIT' else values(numerator)
+        bottom = values(denominator)
+        with np.errstate(divide='ignore', invalid='ignore', over='ignore'):
+            ratio = top / np.where(bottom > 0, bottom, np.nan)
+        ratio = ratio[np.isfinite(ratio)]
+        result[name] = float(np.median(ratio)) if len(ratio) else None
+        result[name + '_n'] = len(ratio)
     if 'TARGET' in data:
-        known = data['TARGET'].isin([0, 1])
-        positive = data['TARGET'] == 1
-        money_known = known & credit.notna()
-        total = credit.loc[money_known].sum()
+        known = data['TARGET'].isin([0, 1]).to_numpy()
+        positive = data['TARGET'].eq(1).fillna(False).to_numpy(dtype=bool)
+        money_known = known & valid_credit
+        total = credit[money_known].sum()
         result.update(label_n=int(known.sum()), positive_n=int((known & positive).sum()),
             label_credit_n=int(money_known.sum()),
-            rate=float(positive.loc[known].mean()) if known.any() else None,
-            positive_credit=float(credit.loc[money_known & positive].sum()) if money_known.any() else None,
-            credit_share=float(credit.loc[money_known & positive].sum() / total) if total > 0 else None)
+            rate=float(positive[known].mean()) if known.any() else None,
+            positive_credit=float(credit[money_known & positive].sum()) if money_known.any() else None,
+            credit_share=float(credit[money_known & positive].sum() / total) if total > 0 else None)
     return result
 
 
 def segment_labels(data, dimension):
+    prepared = '__segment_' + dimension
+    if prepared in data:
+        return data[prepared]
     columns = {'product': 'NAME_CONTRACT_TYPE', 'income': 'NAME_INCOME_TYPE',
         'occupation': 'OCCUPATION_TYPE', 'education': 'NAME_EDUCATION_TYPE',
         'family': 'NAME_FAMILY_STATUS', 'housing': 'NAME_HOUSING_TYPE',
@@ -93,9 +105,18 @@ def segment_labels(data, dimension):
 
 
 def financial_groups(data, dimension):
+    cache = None
+    key = (id(data), dimension)
+    if has_request_context():
+        cache = g.setdefault('financial_group_cache', {})
+        if key in cache:
+            return deepcopy(cache[key][1])
     labels = segment_labels(data, dimension)
     groups = []
-    for label, rows in data.groupby(labels, observed=True, sort=False):
+    columns = ['AMT_CREDIT', 'AMT_INCOME_TOTAL', 'AMT_ANNUITY', 'AMT_GOODS_PRICE']
+    if 'TARGET' in data:
+        columns.append('TARGET')
+    for label, rows in data[columns].groupby(labels, observed=True, sort=False):
         summary = financial_summary(rows)
         summary['label'] = str(label)
         groups.append(summary)
@@ -104,6 +125,9 @@ def financial_groups(data, dimension):
         groups.sort(key=lambda row: order.get(row['label'], len(order)))
     else:
         groups.sort(key=lambda row: (row['credit'] is None, -(row['credit'] or 0), row['label']))
+    if cache is not None:
+        # Retain the frame so Python cannot reuse its identity in this request.
+        cache[key] = (data, deepcopy(groups))
     return groups
 
 

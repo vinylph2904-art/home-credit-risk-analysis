@@ -3,7 +3,8 @@
 @keyframes content-enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 @keyframes chart-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes backdrop-enter{from{opacity:0}to{opacity:1}}
-.page>.page-heading,.page>.report-heading,.login-form-wrap{animation:content-enter 380ms var(--motion-ease) both}
+.page>.page-heading,.page>.report-heading{animation:content-enter 180ms var(--motion-ease) both}
+.login-form-wrap{animation:none}
 .kpi-grid>.kpi{animation:content-enter 400ms var(--motion-ease) both}
 .kpi-grid>.kpi:nth-child(2){animation-delay:35ms}.kpi-grid>.kpi:nth-child(3){animation-delay:70ms}.kpi-grid>.kpi:nth-child(4){animation-delay:105ms}.kpi-grid>.kpi:nth-child(5){animation-delay:140ms}
 .dashboard-chart.chart-ready{animation:chart-enter 560ms var(--motion-ease) both}

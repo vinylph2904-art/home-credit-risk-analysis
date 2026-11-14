@@ -1,6 +1,26 @@
 let pageRequest;
 let detailRequest;
 let detailUrl;
+let filterPreviewTimer;
+let filterPreviewRequest;
+
+function prepareDashboardFilter(form) {
+  clearTimeout(filterPreviewTimer);
+  filterPreviewRequest?.controller.abort();
+  filterPreviewRequest = null;
+  if (!['/', '/risk'].includes(window.location.pathname) || !form.checkValidity()) return;
+  const url = new URL(form.action);
+  url.search = new URLSearchParams(new FormData(form)).toString();
+  filterPreviewTimer = setTimeout(() => {
+    const controller = new AbortController();
+    // Prepare the immutable report while the user is choosing filters.
+    // No visible figures or history change until Apply is pressed.
+    const promise = fetch(url, {signal: controller.signal, cache: 'no-store'})
+      .then(async response => ({ok: response.ok, redirected: response.redirected,
+        url: response.url, html: await response.text()})).catch(() => null);
+    filterPreviewRequest = {url: url.href, controller, promise};
+  }, 250);
+}
 function skeletonMarkup(kind = 'table') {
   const line = '<span class="loading-line"></span>';
   const card = `<div class="loading-card">${line}${line}${line}</div>`;
@@ -76,13 +96,17 @@ async function updateDashboard(target, pushHistory = true) {
   if (detailRequest) detailRequest.abort();
   showDashboardMessage('Đang chuẩn bị dữ liệu…', true);
   try {
-    const response = await fetch(url, {signal: controller.signal, cache: 'no-store'});
+    clearTimeout(filterPreviewTimer);
+    const prepared = filterPreviewRequest?.url === url.href ? await filterPreviewRequest.promise : null;
+    filterPreviewRequest = null;
+    if (controller.signal.aborted) return;
+    const response = prepared || await fetch(url, {signal: controller.signal, cache: 'no-store'});
     if (response.redirected && new URL(response.url).pathname === '/login') {
       window.location.assign(response.url);
       return;
     }
     if (!response.ok) throw new Error('Không tải được phân tích. Kiểm tra lại bộ lọc hoặc thử lại.');
-    const html = await response.text();
+    const html = prepared ? prepared.html : await response.text();
     if (controller.signal.aborted) return;
     const next = new DOMParser().parseFromString(html, 'text/html');
     const currentAssets = [...document.querySelectorAll('script[src],link[rel="stylesheet"]')]
@@ -117,7 +141,7 @@ async function updateDashboard(target, pushHistory = true) {
     if (pushHistory) window.history.pushState({}, '', url);
     document.title = next.title;
     initializePage();
-    await renderDashboardCharts();
+    await renderDashboardCharts({animate: false});
     if (pageRequest === controller) showDashboardMessage('');
   } catch (error) {
     if (pageRequest === controller && error.name !== 'AbortError') showDashboardMessage(error.message);

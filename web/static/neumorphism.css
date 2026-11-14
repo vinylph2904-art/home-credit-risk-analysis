@@ -40,8 +40,9 @@
 .neo-workspace input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=hidden]),
 .neo-workspace select,.neo-workspace textarea{background:var(--neo-card)!important;border-color:var(--neo-edge)!important;border-radius:var(--dashboard-radius,10px);box-shadow:var(--neo-control)!important}
 .neo-workspace :is(input,select,textarea):focus-visible{outline:2px solid #2878b8;outline-offset:2px}
-.neo-workspace dialog{background:var(--neo-card)!important;border-color:var(--neo-edge)!important;box-shadow:10px 12px 32px #27313f29!important}
-.neo-workspace .dialog-header{background:transparent!important;border-color:#e4e6ec}
+.neo-workspace dialog{background:#fff!important;background-image:none!important;backdrop-filter:none!important;border-color:var(--neo-edge)!important;box-shadow:10px 12px 32px #27313f29!important;color:#263849}
+.neo-workspace .dialog-header,.neo-workspace .dialog-body,.neo-workspace .dialog-actions{background:#fff!important;border-color:#e4e6ec}
+.neo-workspace .button[data-open*="filter"],.neo-workspace .kpi-info-button{background:#fff!important;color:#263849}
 .neo-workspace table th{background:#edf5fb!important}
 .neo-workspace .report-insight{background:var(--neo-card)!important;box-shadow:var(--neo-small)!important}
 .neo-workspace .chart-horizontal-legend button{background:transparent!important;box-shadow:none!important}

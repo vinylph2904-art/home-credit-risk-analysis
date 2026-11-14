@@ -1,7 +1,10 @@
 """Prepare financial research snapshots and comparison values."""
 from functools import lru_cache
 from decimal import Decimal
-from flask import redirect, request, url_for
+from collections import OrderedDict
+from copy import deepcopy
+from threading import Lock
+from flask import current_app, redirect, request, url_for
 from models.CreditRiskStatistic import CreditRiskStatistic
 from web.report_cache import read_research_cache
 from web.financial import DIMENSIONS, RATIOS, HISTORY_SOURCES, financial_summary, financial_groups, segment_labels, bureau_summary, portfolio_figures, overview_figures
@@ -10,12 +13,22 @@ from web import runtime
 from web import request_helpers as query
 
 
+# Only immutable research report values are shared. Authentication and CSRF
+# remain outside this cache; managed profiles always read current database state.
+_report_contexts = OrderedDict()
+_report_context_lock = Lock()
+_REPORT_CONTEXT_LIMIT = 16
+
+
 @lru_cache(maxsize=1)
 def research_financial_snapshot(version):
     # Research tables are versioned snapshots; callers only filter copies.
-    return read_research_cache(runtime.REPORT_CACHE_DIR,
+    data = read_research_cache(runtime.REPORT_CACHE_DIR,
         f'{runtime.REPORT_QUERY_VERSION}:{version}:portfolio',
         lambda: runtime.get_data().getFinancialPortfolio('research'))
+    for dimension in DIMENSIONS:
+        data['__segment_' + dimension] = segment_labels(data, dimension)
+    return data
 
 
 
@@ -159,6 +172,15 @@ def _active_financial_filters(filters, dimension, selected):
 def financial_context(overview=False):
     scope, version, reference, data, filters, dimension, selected = financial_data()
     ratio, history_metric, currency, credit_status = _financial_options()
+    cache_key = None
+    if scope == 'research' and not current_app.testing:
+        cache_key = (runtime.REPORT_QUERY_VERSION, version, request.path,
+                     tuple(sorted(request.args.items(multi=True))), overview)
+        with _report_context_lock:
+            cached = _report_contexts.get(cache_key)
+            if cached is not None:
+                _report_contexts.move_to_end(cache_key)
+                return deepcopy(cached)
     bureau_report, support = (financial_history_context(scope, version, reference, data, currency, credit_status)
                               if overview else (None, None))
     summary = financial_summary(data)
@@ -171,7 +193,7 @@ def financial_context(overview=False):
         row['url'] = query.cohort_url('financial_records', segment=dimension, finance_group=row['label'], page=None)
     active_filters = _active_financial_filters(filters, dimension, selected)
     clear_filters = {key: None for key in runtime.COHORT_FIELDS}
-    return {'data_scope': scope, 'data_version': version, 'cohort_filters': filters,
+    result = {'data_scope': scope, 'data_version': version, 'cohort_filters': filters,
         'active_financial_filters': active_filters,
         'clear_financial_filters_url': query.cohort_url(request.endpoint, **clear_filters, finance_group=None),
         'financial_summary': summary, 'reference_n': len(reference), 'kpis': kpis,
@@ -184,6 +206,13 @@ def financial_context(overview=False):
         'history_metric': history_metric, 'history_options': HISTORY_SOURCES,
         'visible_group_n': min(8, len([row for row in groups if row['n'] >= 5]) or len(groups)),
         'overview': overview, 'is_filtered': filtered}
+    if cache_key is not None:
+        with _report_context_lock:
+            _report_contexts[cache_key] = deepcopy(result)
+            _report_contexts.move_to_end(cache_key)
+            while len(_report_contexts) > _REPORT_CONTEXT_LIMIT:
+                _report_contexts.popitem(last=False)
+    return result
 
 
 

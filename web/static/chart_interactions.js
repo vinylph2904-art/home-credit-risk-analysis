@@ -391,7 +391,7 @@ function applyFinancialChartColors(chart, figure) {
   });
 }
 
-async function renderDashboardCharts() {
+async function renderDashboardCharts({animate = true} = {}) {
   if (!window.Plotly) {
     const charts = document.querySelectorAll('.dashboard-chart');
     charts.forEach(chart => { chart.classList.add('chart-error'); });
@@ -433,7 +433,7 @@ async function renderDashboardCharts() {
       chart.classList.add('chart-ready');
       compactChartLabels(chart, payload.figure);
       alignCategoryAxisLabels(chart, payload.figure.data);
-      animateChartMarks(chart);
+      if (animate) animateChartMarks(chart);
       const action = payload.interaction;
       if (!action) return;
       chart.on('plotly_click', event => {

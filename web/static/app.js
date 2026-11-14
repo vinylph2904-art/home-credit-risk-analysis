@@ -101,6 +101,7 @@ if (cohortForm) {
   function markCohortDraft() {
     pageRoot.dataset.filterDirty = 'true';
     if (notice) notice.hidden = false;
+    prepareDashboardFilter(cohortForm);
   }
   cohortForm.addEventListener('input', markCohortDraft);
   cohortForm.addEventListener('change', markCohortDraft);

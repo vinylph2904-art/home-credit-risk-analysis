@@ -97,8 +97,10 @@ class DashboardCharts:
             empty_message='Chưa có hồ sơ đã chấm đủ thông tin tiền' if not amounts['eligible_n'] else None)
 
     def _html(self, figure, chart_id, interaction=None, height=330, empty_message=None):
+        if chart_id.startswith('finance-'):
+            return self._financial_html(figure, chart_id, interaction, height, empty_message)
         figure.update_layout(
-            template='plotly_white', height=height, dragmode=False,
+            height=height, dragmode=False,
             font={'family': 'Inter, Segoe UI, Arial, sans-serif', 'size': 12, 'color': '#6b7e8f'},
             separators=',.',
             margin={'l': 18, 'r': 24, 't': 24, 'b': 42},
@@ -159,6 +161,72 @@ class DashboardCharts:
                                   showarrow=False, font={'color': '#6b7e8f', 'size': 16})
         payload = {'figure': json.loads(pio.to_json(figure)), 'interaction': interaction}
         encoded = json.dumps(payload, ensure_ascii=False).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
+        return f'<div class="dashboard-chart" id="{chart_id}"></div><script type="application/json" class="chart-data" data-chart="{chart_id}">{encoded}</script>'
+
+    def _financial_html(self, figure, chart_id, interaction, height, empty_message):
+        """Style already validated financial figures without repeated Plotly validation."""
+        value = figure.to_plotly_json()
+        layout = value.setdefault('layout', {})
+        layout.update(template='plotly_white', height=height, dragmode=False,
+            font={'family': 'Inter, Segoe UI, Arial, sans-serif', 'size': 12, 'color': '#6b7e8f'},
+            separators=',.', margin={'l': 18, 'r': 24, 't': 24, 'b': 42},
+            paper_bgcolor='rgba(255,255,255,0)', plot_bgcolor='rgba(255,255,255,0)',
+            colorway=CATEGORICAL, hoverdistance=24, barcornerradius=6,
+            hoverlabel={'bgcolor': '#ffffff', 'bordercolor': '#dce8f1', 'align': 'left',
+                'font': {'family': 'Inter, Segoe UI, Arial, sans-serif', 'size': 13, 'color': '#263849'},
+                'namelength': -1})
+        legend = layout.setdefault('legend', {})
+        legend.update(orientation='h', y=1.14, x=0, title={'text': ''})
+        for name, axis in [('xaxis', layout.setdefault('xaxis', {})),
+                           ('yaxis', layout.setdefault('yaxis', {}))]:
+            axis.update(fixedrange=True, showgrid=True, gridcolor='#dfe9f1',
+                showline=False, zeroline=False, ticks='', automargin=True)
+            if name == 'xaxis':
+                axis['gridwidth'] = 1
+            axis.setdefault('tickfont', {})['color'] = '#6b7e8f'
+            title = axis.get('title', {})
+            if isinstance(title, str):
+                title = {'text': title}
+            title.setdefault('font', {})['color'] = '#6b7e8f'
+            axis['title'] = title
+        for trace in value['data']:
+            if trace['type'] in ['bar', 'pie']:
+                trace.setdefault('marker', {})['line'] = {'color': 'rgba(255,255,255,.8)', 'width': 0}
+                trace.setdefault('textfont', {})['size'] = 12
+            if trace['type'] == 'bar' and trace.get('text') is None and trace.get('texttemplate') is None:
+                horizontal = trace.get('orientation') == 'h'
+                values = trace.get('x' if horizontal else 'y', [])
+                # Binary arrays are handled by Plotly; financial bars normally use lists.
+                if isinstance(values, (list, tuple)) and len(values) <= 16:
+                    axis_ref = trace.get('xaxis', 'x') if horizontal else trace.get('yaxis', 'y')
+                    axis = layout.setdefault(axis_ref[0] + 'axis' + axis_ref[1:], {})
+                    percent = '%' in axis.get('tickformat', '')
+                    stacked = layout.get('barmode') in ['stack', 'relative']
+                    trace['text'] = [None if v is None or not math.isfinite(v) or (stacked and percent and v < .06)
+                                     else f'{v:.1%}'.replace('.', ',') if percent
+                                     else f'{v:,.0f}'.replace(',', '.') for v in values]
+                    if '~s' in axis.get('tickformat', ''):
+                        trace['texttemplate'] = '%{x:.3~s}' if horizontal else '%{y:.3~s}'
+                    trace['textposition'] = 'inside' if stacked else 'outside'
+                    trace['cliponaxis'] = False
+                    maximum = max((v for v in values if v is not None and math.isfinite(v)), default=0)
+                    if not stacked and maximum > 0 and axis.get('range') is None:
+                        axis['range'] = [0, maximum * 1.18]
+            if trace['type'] == 'pie':
+                trace.setdefault('hole', .52)
+                trace.setdefault('textinfo', 'percent')
+            template = trace.get('hovertemplate', '')
+            if '<extra>%{fullData.name}</extra>' in template:
+                main = template.split('<extra>')[0]
+                prefix = '' if '%{fullData.name}' in main else '<b>%{fullData.name}</b><br>'
+                trace['hovertemplate'] = prefix + template.replace('<extra>%{fullData.name}</extra>', '<extra></extra>')
+        if empty_message:
+            layout.setdefault('annotations', []).append(dict(text=empty_message, x=.5, y=.5,
+                xref='paper', yref='paper', showarrow=False, font={'color': '#6b7e8f', 'size': 16}))
+        payload = {'figure': value, 'interaction': interaction}
+        encoded = pio.to_json(payload['figure'], validate=False)
+        encoded = '{"figure":' + encoded + ',"interaction":' + json.dumps(interaction, ensure_ascii=False) + '}'
+        encoded = encoded.replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
         return f'<div class="dashboard-chart" id="{chart_id}"></div><script type="application/json" class="chart-data" data-chart="{chart_id}">{encoded}</script>'
 
     def counts(self, rows, unit, chart_id):

@@ -39,6 +39,7 @@ def common_context():
     return {'csrf_token': session['csrf_token'],
             'analyst_accounts': analyst_accounts(runtime.get_db()) if getattr(g, 'current_user', None) and g.current_user['role'] == 'risk_manager' else [],
             'model_version': runtime.model.version,
+            'plotly_asset_version': runtime.plotly.__version__,
             'model_family': runtime.model.family,
             'model_feature_n': len(runtime.model.feature_order),
             'model_threshold': runtime.model.threshold, 'statuses': runtime.STATUSES,
@@ -94,7 +95,14 @@ def register_hooks(app):
     @app.after_request
     def revalidate_static_assets(response):
         if request.endpoint == 'static':
-            response.headers['Cache-Control'] = 'no-cache, must-revalidate'
+            version = request.args.get('v')
+            path = (runtime.ROOT / 'web/static' / (request.view_args or {}).get('filename', '')).resolve()
+            root = (runtime.ROOT / 'web/static').resolve()
+            if (version and path.is_relative_to(root) and path.is_file()
+                    and version == hashlib.sha256(path.read_bytes()).hexdigest()[:16]):
+                response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+            else:
+                response.headers['Cache-Control'] = 'no-cache, must-revalidate'
         return response
 
     app.teardown_appcontext(close_db)

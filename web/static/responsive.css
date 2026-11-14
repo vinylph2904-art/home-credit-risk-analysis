@@ -1,0 +1,70 @@
+/* Touch layouts: keep navigation available without squeezing tablet reports. */
+@media screen and (max-width:1100px) {
+  html body.analytics-shell .sidebar {
+    width:min(280px,calc(100vw - 64px));
+    transform:translateX(calc(-100% - 24px));
+    z-index:60;
+    transition:transform 160ms ease;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    background:#fff!important;
+  }
+  html body.analytics-shell.menu-open .sidebar {transform:none}
+  html body.analytics-shell .main {margin-left:0!important;min-width:0}
+  html body.analytics-shell .topbar {left:12px!important;right:12px!important;width:auto!important}
+  html body.analytics-shell .topbar .mobile-menu {
+    display:inline-flex;flex-shrink:0;align-self:flex-start;
+    width:44px;min-height:44px;align-items:center;justify-content:center;
+  }
+  html body.analytics-shell.menu-open .nav-backdrop {
+    display:block;position:fixed;inset:0;z-index:55;
+    border:0;background:#26384966;
+  }
+  html body.analytics-shell dialog {
+    width:min(760px,calc(100vw - 24px));max-width:calc(100vw - 24px);
+    max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain;
+  }
+  html body.analytics-shell dialog .dialog-header {
+    position:sticky;top:0;z-index:3;background:#fff!important;
+  }
+  html body.analytics-shell :is(button.button,.icon-button,summary.button,.queue-tabs a) {min-height:44px}
+  html body.analytics-shell .page .kpi .kpi-info-button {
+    width:40px;height:40px;min-height:40px;right:4px;top:4px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  html body.analytics-shell.neo-workspace .page .reference-card-layout>.kpi {
+    grid-template-rows:minmax(34px,auto) 84px!important;
+  }
+  html body.analytics-shell.neo-workspace .page .reference-card-layout>.kpi .label {
+    white-space:normal!important;padding-right:24px;line-height:1.5;
+  }
+  html body.analytics-shell .page-footer {flex-wrap:wrap;gap:8px;overflow-wrap:anywhere}
+}
+@media screen and (min-width:700px) and (max-width:1100px) {
+  html body.analytics-shell.neo-workspace .page .reference-card-layout {
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  html body.analytics-shell.financial-view .financial-chart-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  html body.analytics-shell.financial-view .financial-chart-grid>.report-panel {grid-column:auto!important;min-width:0}
+}
+@media screen and (max-width:699px) {
+  html body.analytics-shell .topbar {padding:10px!important;gap:6px}
+  html body.analytics-shell .topbar-content {min-width:0}
+  html body.analytics-shell :is(input:not([type=checkbox]):not([type=radio]),select,textarea) {font-size:16px}
+  html body.analytics-shell dialog .dialog-body {padding:16px;line-height:1.6}
+  html body.analytics-shell dialog :is(.cohort-grid,.filter-grid,.application-filters) {grid-template-columns:minmax(0,1fr)}
+  html body.analytics-shell dialog .span-two {grid-column:1/-1}
+  html body.analytics-shell .financial-chart-control {flex-wrap:wrap;max-width:100%}
+  html body.analytics-shell .financial-chart-control select {max-width:100%;min-height:44px}
+  html body.analytics-shell .assessment-navigation-row {gap:12px}
+  html body.analytics-shell .assessment-list-settings {flex-wrap:wrap}
+  html body.analytics-shell .assessment-search-label {display:none}
+  html body.analytics-shell .topbar-content>.assessment-toolbar {flex-wrap:wrap!important}
+  html body.analytics-shell .assessment-toolbar .assessment-search {flex:1 1 190px;min-width:0}
+  html body.analytics-shell .assessment-search input {min-width:0;min-height:44px}
+}
+@media (prefers-reduced-motion:reduce) {
+  html body.analytics-shell .sidebar {transition:none}
+}

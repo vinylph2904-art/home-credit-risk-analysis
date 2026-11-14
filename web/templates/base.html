@@ -33,10 +33,11 @@
   <script defer src="{{ url_for('static', filename='dashboard_navigation.js', v='skeleton-1') }}"></script>
   <script defer src="{{ url_for('static', filename='chart_interactions.js') }}"></script>
   <script defer src="{{ url_for('static', filename='app.js') }}"></script>
-  {% if plotly_enabled %}<script src="{{ url_for('plotly_javascript') }}"></script>{% endif %}
+  {% if plotly_enabled %}<script src="{{ url_for('plotly_javascript', v=plotly_asset_version) }}"></script>{% endif %}
 <link rel="stylesheet" href="{{ url_for('static',filename='dashboard_colors.css') }}">
 <link rel="stylesheet" href="{{ url_for('static',filename='kpi_cards.css') }}">
 <link rel="stylesheet" href="{{ url_for('static',filename='risk_status.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='responsive.css') }}">
 {% if request.endpoint=='application_detail' %}<link rel="stylesheet" href="{{ url_for('static',filename='assessment_review.css') }}">{% endif %}
 <link rel="stylesheet" href="{{ url_for('static',filename='sidebar_navigation.css') }}">
 </head>

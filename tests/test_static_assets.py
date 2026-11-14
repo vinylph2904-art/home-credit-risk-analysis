@@ -28,3 +28,13 @@ def test_static_files_remain_public_and_revalidated():
     response = app.test_client().get('/static/login.css')
     assert response.status_code == 200
     assert response.headers['Cache-Control'] == 'no-cache, must-revalidate'
+
+
+def test_content_versioned_assets_can_be_reused_without_revalidation():
+    with app.test_request_context('/'):
+        address = url_for('static', filename='login.css')
+    response = app.test_client().get(address)
+    assert response.status_code == 200
+    assert response.headers['Cache-Control'] == 'public, max-age=31536000, immutable'
+    stale = app.test_client().get('/static/login.css?v=outdated')
+    assert stale.headers['Cache-Control'] == 'no-cache, must-revalidate'
