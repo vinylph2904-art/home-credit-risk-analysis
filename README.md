@@ -20,13 +20,19 @@ Dashboard sử dụng mô hình đã lưu nên bạn có thể chạy ứng dụ
 
 ## Một số hình ảnh giao diện
 
-Các ảnh dưới đây được lưu từ lần kiểm tra giao diện với dữ liệu demo. Số liệu trên màn hình phụ thuộc vào dữ liệu và quyền truy cập của tài khoản.
+Các ảnh dưới đây được chụp trực tiếp từ ứng dụng ngày 14/11/2026, bằng tài khoản trưởng bộ phận rủi ro. Số liệu trên màn hình phụ thuộc vào dữ liệu và quyền truy cập của tài khoản.
 
 ### Tổng quan tài chính và tín dụng
 
 Trang tổng quan tập hợp các chỉ số và biểu đồ để người dùng theo dõi cơ cấu khoản vay, thu nhập và các dấu hiệu thanh toán trong lịch sử.
 
 ![Dashboard tổng quan tài chính và tín dụng với các chỉ số, cơ cấu khoản vay và biểu đồ phân bố](docs/images/dashboard-overview.png)
+
+### Rà soát hồ sơ
+
+Danh sách 200 hồ sơ demo hiển thị điểm rủi ro, cảnh báo mô hình, trạng thái rà soát và người phụ trách, cùng các công cụ tìm kiếm, lọc và phân công.
+
+![Giao diện rà soát 200 hồ sơ demo, sắp xếp theo điểm rủi ro](docs/images/applications-dashboard.png)
 
 ### Thông tin và đánh giá mô hình
 

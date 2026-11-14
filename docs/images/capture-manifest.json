@@ -1,0 +1,20 @@
+[
+  {
+    "file": "dashboard-overview.png",
+    "path": "/",
+    "captured_at": "2026-11-14T12:31:29.778518",
+    "status": 200
+  },
+  {
+    "file": "applications-dashboard.png",
+    "path": "/applications",
+    "captured_at": "2026-11-14T12:31:30.896192",
+    "status": 200
+  },
+  {
+    "file": "model-dashboard.png",
+    "path": "/model",
+    "captured_at": "2026-11-14T12:31:32.439077",
+    "status": 200
+  }
+]
