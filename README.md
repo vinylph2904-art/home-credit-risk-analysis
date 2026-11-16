@@ -2,7 +2,8 @@
 
 Dự án được thực hiện trong môn Học máy trong phân tích kinh doanh, sử dụng bộ dữ liệu
 Home Credit Default Risk để xây dựng mô hình dự báo rủi ro thanh toán. Mỗi dự báo
-tương ứng với một hồ sơ `SK_ID_CURR`, trong đó `TARGET = 1` là lớp có rủi ro.
+tương ứng với một hồ sơ `SK_ID_CURR`, trong đó `TARGET = 1` là nhãn khó khăn
+thanh toán theo định nghĩa của bộ dữ liệu, chưa phải xác suất vỡ nợ 12 tháng.
 
 Bên cạnh các notebook phân tích và huấn luyện, dự án có dashboard Flask để xem
 thông tin danh mục, tra cứu hồ sơ, chấm điểm và hỗ trợ sắp xếp thứ tự rà soát.
@@ -20,31 +21,30 @@ Dashboard sử dụng mô hình đã lưu nên bạn có thể chạy ứng dụ
 
 ## Một số hình ảnh giao diện
 
-Các ảnh được lấy từ mục **4.6.1. Kết quả triển khai ứng dụng** trong báo cáo đồ án (Hình 4.17–4.20), ghi nhận giao diện ngày 08/11/2026. Số liệu trên màn hình phụ thuộc vào dữ liệu và quyền truy cập của tài khoản.
+Ba ảnh dưới được chụp từ ứng dụng ngày 14/11/2026; thời điểm và đường dẫn được
+ghi trong [capture-manifest.json](docs/images/capture-manifest.json). Số liệu
+phụ thuộc vào dữ liệu, bộ lọc và quyền truy cập tại thời điểm chụp.
+
+### Tổng quan tài chính
+
+Trang tổng quan trình bày dữ liệu nghiên cứu trên tập train; các trang tác nghiệp
+sử dụng danh sách hồ sơ đang quản lý. Phạm vi được ghi trên giao diện.
+
+![Tổng quan tài chính ngày 14/11/2026](docs/images/dashboard-overview.png)
 
 ### Rà soát hồ sơ
 
-Danh sách 200 hồ sơ demo hiển thị điểm rủi ro, cảnh báo mô hình, trạng thái rà soát và người phụ trách, cùng các công cụ tìm kiếm, lọc và phân công.
+Danh sách hồ sơ hiển thị điểm dự báo, cảnh báo mô hình, trạng thái rà soát và
+người phụ trách, cùng các công cụ tìm kiếm, lọc, nhập/xuất và phân công.
+Snapshot bàn giao có 200 hồ sơ; số hồ sơ có thể thay đổi trong quá trình sử dụng.
 
-![Hình 4.17. Giao diện hàng đợi rà soát hồ sơ](docs/images/report-queue.png)
-
-### Phân công và theo dõi công việc
-
-Tab Phân công tổng hợp khối lượng rà soát theo người phụ trách và trạng thái xử lý, giúp người quản lý theo dõi những hồ sơ chưa được giao.
-
-![Hình 4.18. Giao diện phân công và theo dõi khối lượng rà soát](docs/images/report-assignments.png)
-
-### Lịch sử chấm điểm
-
-Mỗi lần chấm điểm được lưu cùng ngưỡng cảnh báo, thời điểm và phiên bản mô hình để thuận tiện tra cứu, đối soát.
-
-![Hình 4.19. Giao diện lịch sử chấm điểm hồ sơ](docs/images/report-history.png)
+![Danh sách hồ sơ ngày 14/11/2026](docs/images/applications-dashboard.png)
 
 ### Thông tin và đánh giá mô hình
 
 Trang mô hình hiển thị các chỉ số trên tập validation, đường Precision–Recall, ROC, ma trận nhầm lẫn và hiệu quả rà soát theo số lượng hồ sơ.
 
-![Hình 4.20. Giao diện đánh giá hiệu năng mô hình](docs/images/report-model.png)
+![Đánh giá mô hình ngày 14/11/2026](docs/images/model-dashboard.png)
 
 ## Công nghệ sử dụng
 
@@ -82,13 +82,19 @@ Dự án được xây dựng và kiểm tra trên Windows với Python 3.14 và
 Các lệnh dưới đây chạy trong PowerShell, tại thư mục chứa README này.
 Nên dùng đúng phiên bản thư viện trong `requirements.txt` để tải được mô hình đã lưu.
 
-Để chạy dashboard, bạn cần có database đã khôi phục cùng mô hình và các tệp đi kèm trong `artifacts/`. Xem [hướng dẫn database](data/database/README.md) và [tài liệu mô hình đã lưu](artifacts/README.md) để chuẩn bị các tệp cần thiết. Node.js cần được cài nếu muốn chạy đầy đủ kiểm thử JavaScript.
+Để chạy dashboard, cần database đã khôi phục, mô hình trong `artifacts/` và
+các tệp đánh giá mà metadata chỉ định. **Bản clone GitHub không có các tệp
+Parquet, `data/database/database.sql.gz` và thông tin tài khoản demo** vì chúng
+được loại khỏi Git. Lấy các tệp này từ bộ dữ liệu bàn giao riêng và đặt đúng vị trí
+theo [hướng dẫn dữ liệu](data/README.md). Các model joblib và metadata có trong Git.
+Node.js chỉ cần khi chạy phần kiểm thử JavaScript.
 
 ## Cài đặt và chạy
 
 ### 1. Cài thư viện
 
-Tải hoặc clone dự án về máy, mở terminal tại thư mục chứa README này, rồi tạo môi trường Python:
+Tải bộ dự án đầy đủ hoặc clone mã nguồn rồi bổ sung gói dữ liệu. Mở terminal tại
+thư mục chứa README này và tạo môi trường Python:
 
 ```powershell
 py -3.14 -m venv .venv
@@ -102,10 +108,21 @@ Khôi phục database theo [hướng dẫn dữ liệu](data/database/README.md)
    `MYSQL_USER`, `MYSQL_PASSWORD`. Hoặc sao chép
    `configs/mysql_connection.local.example.json` thành
    `configs/mysql_connection.local.json` và điền mật khẩu MySQL trên máy của bạn.
-   File mẫu chỉ cấu hình mật khẩu; host, port, user và database đọc từ biến môi trường
-   hoặc `configs/mysql_connection.json`.
+   File local chỉ được Connector dùng để đọc mật khẩu; host, port, user và database
+   đọc từ biến môi trường hoặc `configs/mysql_connection.json`.
    `mysql_connection.local.json` là cấu hình riêng để chạy trên máy hiện tại;
    khi chia sẻ dự án, chỉ gửi file mẫu `.example.json` và giữ file chứa mật khẩu trên máy.
+
+Mặc định trong `configs/mysql_connection.json` là `localhost:3306`, database
+`home_credit_ml`, user `root`. Nếu nhập dump vào `home_credit_submission` như
+hướng dẫn, đặt biến này trong **cùng terminal** trước khi kiểm tra hoặc chạy web:
+
+```powershell
+$env:MYSQL_DATABASE = 'home_credit_submission'
+```
+
+Các biến `MYSQL_*` ghi đè cấu hình JSON. Nếu dùng mật khẩu từ file local,
+không đặt đồng thời `MYSQL_PASSWORD` với một giá trị cũ trong terminal.
 
 ### 3. Khởi động ứng dụng
 
@@ -115,7 +132,10 @@ Khi đã khôi phục đầy đủ database và cấu hình kết nối, chạy:
 .venv\Scripts\python.exe web/app.py
 ```
 
-Truy cập **http://127.0.0.1:5000** trong trình duyệt. Đăng nhập bằng tài khoản được cấp cho bản demo; thông tin truy cập được trao đổi ngoài repository. Tài khoản dashboard được quản lý riêng với tài khoản kết nối MySQL.
+Truy cập **http://127.0.0.1:5000** trong trình duyệt. Đăng nhập bằng tài khoản
+được cấp cho bản demo; gói dữ liệu cục bộ có `data/database/demo_accounts.json`,
+file này không được đưa lên GitHub. Tài khoản dashboard được quản lý riêng
+với tài khoản kết nối MySQL.
 
 Nếu cổng 5000 đang được sử dụng, bạn có thể chạy ở cổng khác:
 
@@ -142,13 +162,16 @@ Hồ sơ trong bản demo được chọn từ `application_test` đã có sẵn
 
 ```text
 8 bảng nguồn → MySQL raw_* → hiểu dữ liệu và chất lượng
-→ đặc trưng A/B → chọn biến → huấn luyện/đánh giá → artifact → Flask
+→ đặc trưng A/B → chọn biến → nhập bộ B vào MySQL ở notebook 06
+→ huấn luyện/đánh giá → artifact → Flask
 ```
 
 Các notebook được chạy theo thứ tự trong [hướng dẫn notebook](notebooks/README.md),
 với kernel mới cho mỗi notebook. Notebook 02 chuẩn bị dữ liệu cho phần khám phá
 ở notebook 03. Tiếp theo, notebook 04 xây dựng hai bộ đặc trưng A/B, notebook 05
-chọn biến, notebook 06 so sánh mô hình, notebook 07 đánh giá và notebook 08 diễn giải kết quả.
+chọn biến, notebook 06 nhập đặc trưng vào MySQL rồi so sánh mô hình, notebook 07
+đánh giá và notebook 08 diễn giải kết quả. Các notebook 01–04 và 06–07 cần
+kết nối MySQL; các bước khác còn đọc đầu ra đã lưu của bước trước.
 
 Dashboard sử dụng mô hình đã lưu nên có thể chạy mà không cần huấn luyện lại.
 
@@ -159,7 +182,8 @@ Bộ A gồm 127 biến, bộ B gồm 199 biến. Bộ Filter cuối có 182 bi�
 ## Mô hình và kết quả
 
 Dashboard sử dụng CatBoost với độ sâu 6, 500 vòng huấn luyện và 182 biến đầu vào.
-Điểm dự báo được giữ ở dạng raw score, với ngưỡng cảnh báo
+Điểm dự báo là xác suất lớp 1 gốc từ `predict_proba()[:, 1]`, không áp dụng
+sigmoid calibration (`use_sigmoid=false`), với ngưỡng cảnh báo
 `0.14539365168823878` (khoảng 14,5394%).
 
 Mô hình được chọn dựa trên AP trung bình qua các fold kiểm định chéo. Các phương án
@@ -167,7 +191,7 @@ hiệu chỉnh xác suất được so sánh trên tập train; ngưỡng cảnh
 tập validation theo giả định chi phí `5FN + FP`. Khi người dùng thao tác trên web,
 ứng dụng chỉ tải mô hình và dự báo.
 
-Kết quả đã ghi nhận trên tập test:
+Kết quả đã lưu của phiên bản này trên tập kiểm tra nội bộ lịch sử:
 
 | Chỉ số | Kết quả |
 |---|---|
@@ -195,11 +219,12 @@ Xem [kết quả mô hình](reports/modeling/README.md),
 .venv\Scripts\python.exe -m pytest tests -q -p no:cacheprovider
 ```
 
-Máy cần có Node.js để chạy đầy đủ các kiểm thử JavaScript. Khi chạy lệnh pytest
-ở trên, các kiểm thử Python liên quan sẽ tự gọi Node.js.
+Các kiểm thử Python liên quan tự gọi `node --test`. Nếu máy không có Node.js,
+những kiểm thử đó được đánh dấu `skipped`; cần cài Node.js để chạy đầy đủ.
 
-Cache và dữ liệu tạm của quá trình kiểm thử được lưu trong `tmp/`. Bạn có thể
-xóa thư mục này sau khi dừng ứng dụng.
+`tmp/` chứa cache dashboard và dữ liệu tạm của kiểm thử. Checkpoint CV hiện hành
+nằm trong các thư mục `reports/modeling/.../cache/`; xem
+[hướng dẫn notebook](notebooks/README.md) trước khi chạy lại nghiên cứu.
 
 ## Trao đổi và đóng góp
 

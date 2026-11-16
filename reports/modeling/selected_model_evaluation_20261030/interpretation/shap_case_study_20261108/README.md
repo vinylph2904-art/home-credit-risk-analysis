@@ -1,22 +1,40 @@
-# Minh họa SHAP cục bộ — 08/11/2026
+# Minh họa SHAP cục bộ ngày 08 tháng 11 năm 2026
 
-Đây là phân tích suy luận bổ sung cho mục 4.5.1, không phải chạy lại huấn luyện hay thay thế kết quả notebook 08 đã lưu ngày 30/10.
+Phân tích suy luận bổ sung cho mục 4.5.1 của báo cáo, sử dụng artifact
+`catboost-selected-a8763faa0c2ef0786f72`: CatBoost 1.2.10, 182 đặc trưng,
+`use_sigmoid=false`, ngưỡng `0.14539365168823878`. Đây không phải đợt huấn luyện lại.
 
-- Artifact: catboost-selected-a8763faa0c2ef0786f72; CatBoost 1.2.10; 182 đặc trưng; use_sigmoid=false; ngưỡng 0.14539365168823878.
-- Hai hồ sơ 100001 và 100005 là hai dòng đầu của sample_predictions.csv có sẵn, được chọn trước khi tính SHAP. Cả hai thuộc application_test, chưa có TARGET. Không gọi chúng là FP/FN hoặc dùng để xác nhận độ chính xác.
-- Mô hình, ngưỡng và database không thay đổi. Không đánh giá độ ổn định SHAP hoặc tính công bằng trong bước này.
+Hai hồ sơ 100001 và 100005 là hai dòng đầu trong `../sample_predictions.csv`
+đã có, được chọn trước khi tính SHAP. Cả hai thuộc `application_test`, chưa có
+TARGET; không gọi chúng là FP/FN hoặc dùng để xác nhận dự báo đúng/sai.
 
-## Tệp kết quả
+## Tệp kết quả đang lưu
 
-- verification.json: danh tính/mã băm nguồn, môi trường, quy tắc chọn hồ sơ, bốn nhóm kiểm tra và top 5 đóng góp.
-- case_summary.csv: điểm, ngưỡng, cảnh báo, giá trị nền, tổng SHAP, raw margin, sai số tái tạo.
-- shap_values_all_features.csv: đủ 182 đóng góp cho mỗi hồ sơ.
-- selected_inputs.parquet: đầu vào chọn theo feature_order; giữ độ chính xác dữ liệu để tái hiện.
+- [verification.json](verification.json): model/hash, môi trường, quy tắc chọn hồ sơ và bốn nhóm kiểm tra; kết quả ghi nhận ngày 08/11/2026 là `passed`.
+- [case_summary.csv](case_summary.csv): điểm, ngưỡng, cảnh báo, giá trị nền, tổng SHAP, margin và sai số tái tạo.
+- [shap_values_all_features.csv](shap_values_all_features.csv): đủ 182 đóng góp của mỗi hồ sơ.
+- `selected_inputs.parquet`: đầu vào theo feature_order; tệp Parquet được bàn giao riêng, không theo dõi trong Git.
+- [shap_waterfall.png](shap_waterfall.png), [shap_waterfall.pdf](shap_waterfall.pdf) và [waterfall_verification.json](waterfall_verification.json): hình minh họa và đối chiếu hình đã lưu.
 
-## Cách kiểm tra lại
+## Kiểm tra lại bằng script hiện có
 
-Từ thư mục dự án, chạy `py -3.14 scripts/verify_shap_case_study.py`.
+Từ gốc `project/`, dùng môi trường đã cài `requirements.txt`:
 
-Script kiểm tra tổng SHAP cộng giá trị nền khớp raw margin với atol=1e-10; sigmoid(raw margin) và điểm trong sample_predictions.csv khớp predict_proba với atol=1e-12; top 10 trong hàm web khớp SHAP CatBoost với atol=1e-10. Kết quả hiện tại passed.
+```powershell
+.venv\Scripts\python.exe scripts/verify_shap_case_study.py
+```
 
-SHAP thuộc thang raw margin, không phải điểm phần trăm xác suất. Hàm sigmoid chuyển raw margin của bộ phân loại sang xác suất gốc không đồng nhất với sigmoid calibration đã so sánh trên train OOF. Các đóng góp được diễn giải theo hồ sơ, không suy ra quan hệ nhân quả.
+Script cần `data/features/b/application_test.parquet`, model và metadata hiện hành,
+cùng `sample_predictions.csv` đã lưu. Nó không cần kết nối MySQL, không fit model
+và không thay ngưỡng, nhưng **ghi lại** `verification.json`, `case_summary.csv`,
+`shap_values_all_features.csv` và `selected_inputs.parquet` trong thư mục này.
+Script không tạo lại các hình waterfall.
+
+Các phép kiểm tra: giá trị nền + toàn bộ SHAP khớp raw margin với atol=1e-10;
+sigmoid(margin) và điểm mẫu khớp `predict_proba` với atol=1e-12; top 10 do hàm
+web trả về khớp SHAP CatBoost với atol=1e-10. Kết quả mới phải đọc từ lần chạy mới,
+không mặc nhiên lấy trạng thái `passed` của đợt đã lưu.
+
+SHAP thuộc thang raw margin/logit, không phải điểm phần trăm xác suất.
+Sigmoid chuyển margin sang xác suất gốc khác với sigmoid calibration đã so sánh
+trên train OOF. Minh họa không xác lập nhân quả, độ ổn định SHAP hoặc tính công bằng.

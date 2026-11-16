@@ -1,29 +1,60 @@
-# Model dùng cho ứng dụng
+# Mô hình dùng trong ứng dụng
 
-Bản cuối cho đồ án được chốt ngày 30/10/2026: **CatBoost 182 biến, raw score, ngưỡng 14,5394%**. Model và metadata nằm trong `catboost_selected_a8763faa0c2ef0786f72/`. Xem [quyết định chốt phiên bản](../reports/modeling/selected_model_evaluation_20261030/project_model_decision.md). Bản này đã được tích hợp vào dashboard ngày 31/10/2026.
+Nguồn xác định phiên bản đang nạp là [inference_metadata.json](inference_metadata.json),
+được `CreditRiskModel.loadModel()` đọc khi khởi tạo runtime.
 
-Model đang hoạt động: **CatBoost**, raw score, **182 biến**, threshold **14,5394%**.
-Runtime đọc `artifacts/inference_metadata.json` và joblib tại `model_path`.
-Metadata chứa phiên bản, họ model, thứ tự 182 đặc trưng, input preparation,
-calibration, threshold và đường dẫn báo cáo đúng model.
+| Thuộc tính hiện hành | Giá trị |
+|---|---|
+| Phiên bản | `catboost-selected-a8763faa0c2ef0786f72` |
+| Ứng viên | `B_FILTER_CAT_02` |
+| Model | CatBoost depth 6, 500 vòng |
+| Đầu vào | 182 đặc trưng: 166 số, 16 phân loại |
+| Artifact | `catboost_selected_a8763faa0c2ef0786f72/credit_risk_model.joblib` |
+| Xác suất | Xác suất lớp 1 gốc từ `predict_proba`, `use_sigmoid=false` |
+| Ngưỡng | `0.14539365168823878`, khoảng 14,5394%; cảnh báo khi `score >= threshold` |
+| Dữ liệu fit cuối | 184.506 hồ sơ train; không fit lại trên train + validation |
 
-`CreditRiskModel.prepareInput()` nhận đúng schema rồi `predict()` chấm điểm.
-Với CatBoost: numeric float32, giữ NaN/0; categorical chuỗi, thiếu thành
-`__MISSING__`. Các bước này không học thống kê; không impute/log/scale/one-hot.
-Classifier và calibrator đã fit nằm trong artifact; web không huấn luyện.
-SHAP trong chi tiết hồ sơ giải thích raw margin của CatBoost; bản hiện hành không dùng sigmoid,
-không phải đóng góp vào score cuối hoặc nguyên nhân nhân quả.
+Đây là bản được chốt ngày 30/10 và tích hợp dashboard ngày 31/10/2026.
+Metadata còn lưu thứ tự cột, phương án xác suất, hash đăng ký và đường dẫn
+đánh giá validation. Bản metadata trong thư mục model giữ cấu hình của chính artifact đó.
 
-LR cũ cùng `fit_metadata.json`, `frozen_policy.json`, `selected_model.json`
-được giữ làm lịch sử. Metadata LR lưu tại
-`0f70b06abaf3cbab/inference_metadata.json`. Các artifact cũ phục vụ đối chiếu
-lịch sử; notebook 06–08 hiện dùng model sau Filter.
+## Suy luận và diễn giải
 
-Schema MySQL giữ nguyên. Phiên bản mới được đăng ký và bổ sung scoring events;
-không ghi đè điểm cũ, trạng thái rà soát hoặc ghi chú. `legacy_registration`
-giữ hai trường hash tương thích với schema đã có.
+`CreditRiskModel.prepareInput()` yêu cầu đủ đúng schema, đưa cột về đúng thứ tự,
+chuyển số sang float32, giữ NaN/0 và từ chối giá trị vô hạn. Biến phân loại nhận
+chuỗi hoặc giá trị thiếu; thiếu được thay bằng `__MISSING__`. Nhánh CatBoost
+hiện tại không điền trung vị, log, scale hay one-hot trong bước suy luận.
 
-Xem [kết quả](../reports/modeling/selected_model_evaluation_20261030/results.md) và
-[bằng chứng chuyển phiên bản](../reports/modeling/selected_model_evaluation_20261030/dashboard_activation.json).
-Chạy `py scripts/activate_selected_model.py` trên DB đã có dữ liệu để đăng ký model và bổ sung điểm cho hồ sơ hoạt động chưa có điểm của phiên bản mới. Chạy lại không thêm điểm cho hồ sơ đã chấm phiên bản này.
-Score hỗ trợ ưu tiên rà soát theo nhãn nguồn, chưa phải PD 12 tháng hoặc quyết định vay.
+`predict()` trả score từ `predict_proba()[:, 1]`, ngưỡng và cờ cảnh báo.
+Đây không phải raw margin. SHAP trên trang chi tiết phân rã raw margin/logit;
+sigmoid chuyển margin sang xác suất gốc khác với sigmoid calibration đã được
+so sánh rồi không chọn. Web tải mô hình đã fit và không huấn luyện khi chấm điểm.
+
+## Các artifact lịch sử còn giữ
+
+| Vị trí | Vai trò |
+|---|---|
+| `0f70b06abaf3cbab/` | Pipeline Logistic Regression cũ; có `fit_metadata.json`, `frozen_policy.json` và metadata riêng |
+| `catboost_4fec95c745d24f99893d/` | CatBoost bộ B 199 biến của đợt trước lọc, có `fit_metadata.json` và metadata riêng |
+| `selected_model.json` | Quyết định LR lịch sử, không phải metadata runtime đang hoạt động |
+| `catboost_selected_a8763faa0c2ef0786f72/` | Model sau Filter hiện hành, có `training_metadata.json` và metadata riêng |
+
+## Đăng ký phiên bản trong MySQL
+
+Nếu cần đăng ký bản đã chốt và bổ sung điểm cho hồ sơ hoạt động chưa có điểm của
+phiên bản đó, chạy từ gốc dự án sau khi cấu hình MySQL:
+
+```powershell
+.venv\Scripts\python.exe scripts/activate_selected_model.py
+```
+
+Script kiểm tra hash với quyết định đã chốt, đăng ký `model_versions`, thêm
+scoring events và cập nhật metadata hoạt động. Script giữ điểm lịch sử,
+phân công, trạng thái rà soát và ghi chú; chạy lại không thêm điểm cho hồ sơ đã
+có điểm của phiên bản hiện hành. Dump bàn giao đã đăng ký model nên không cần
+chạy lại bước này để mở dashboard.
+
+Xem [quyết định phiên bản](../reports/modeling/selected_model_evaluation_20261030/project_model_decision.md),
+[kết quả](../reports/modeling/selected_model_evaluation_20261030/results.md) và
+[bằng chứng kích hoạt](../reports/modeling/selected_model_evaluation_20261030/dashboard_activation.json).
+Điểm hỗ trợ ưu tiên rà soát theo nhãn nguồn, chưa phải PD 12 tháng hoặc quyết định cho vay.
