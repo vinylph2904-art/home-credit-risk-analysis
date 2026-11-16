@@ -1,4 +1,4 @@
-# Home Credit — Dự báo rủi ro thanh toán của khách hàng vay
+# Home Credit - Dự báo rủi ro thanh toán của khách hàng vay
 
 Dự án được thực hiện trong môn Học máy trong phân tích kinh doanh, sử dụng bộ dữ liệu
 Home Credit Default Risk để xây dựng mô hình dự báo rủi ro thanh toán. Mỗi dự báo
@@ -236,7 +236,5 @@ Trước khi chia sẻ log hoặc cấu hình, hãy bỏ mật khẩu, khóa tru
 
 - [Home Credit Default Risk](https://www.kaggle.com/competitions/home-credit-default-risk/data)
   và từ điển gốc `data/metadata/HomeCredit_columns_description.csv`.
-- Bài giảng và ví dụ của Trần Duy Thanh: tổ chức Connector, đọc dữ liệu MySQL,
-  Preparing Data, huấn luyện, lưu/tải và tích hợp model. Các lớp đã được điều chỉnh
-  cho dữ liệu và yêu cầu của đồ án; không phải bản sao nguyên trạng ví dụ.
+- Tham khảo bài giảng và các ví dụ minh họa của TS. Trần Duy Thanh (Trường Đại học Kinh tế – Luật, Đại học Quốc gia TP. Hồ Chí Minh) về tổ chức Connector, đọc dữ liệu từ MySQL, chuẩn bị dữ liệu (Preparing Data), huấn luyện mô hình, lưu/tải mô hình và tích hợp mô hình vào ứng dụng. Các lớp và thành phần mã nguồn được điều chỉnh, mở rộng để phù hợp với cấu trúc dữ liệu, yêu cầu kỹ thuật và mục tiêu của đồ án; không sao chép nguyên trạng các ví dụ minh họa.
 - Rose & Hudgins (2008), Bank Management & Financial Services, chương 16 và 18.
